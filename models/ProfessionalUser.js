@@ -6,7 +6,7 @@ const ProfessionalUser = User.discriminator(
   new mongoose.Schema({
     about: {
       type: String,
-      maxLength: [500, "About cannot be more than 500 characters long"]
+      maxLength: [500, "About cannot be more than 500 characters long"],
     },
     license: { type: String, required: true },
     qualification: {
@@ -15,6 +15,12 @@ const ProfessionalUser = User.discriminator(
     },
     specialization: [String],
     rank: Number,
+    tags: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "Tag",
+      },
+    ],
   })
 );
 

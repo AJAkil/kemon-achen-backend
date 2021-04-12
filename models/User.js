@@ -57,10 +57,12 @@ const User = mongoose.model(
       image: String,
       resetPasswordToken: String,
       resetPasswordExpire: Date,
-      createdAt: {
-        type: Date,
-        default: Date.now,
-      },
+      communities: [
+        {
+          type: mongoose.Schema.ObjectId,
+          ref: "Community",
+        },
+      ]
     },
     baseOptions
   )

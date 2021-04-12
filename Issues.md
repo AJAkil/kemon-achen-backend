@@ -1,0 +1,6 @@
+## Schema
+
+### User
+
+- location
+- image

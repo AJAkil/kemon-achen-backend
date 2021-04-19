@@ -1,0 +1,14 @@
+[
+  {
+    "role": "regular",
+    "password": "123456",
+    "name": "Ajwad Akil",
+    "email": "akil@gmail.com",
+    "phone": "01759099000",
+    "description": "Nothing Interesting in general",
+    "address": "25-Katalgonj, Panchlaish, Chattogram",
+    "dateOfBirth": "3/3/1997",
+    "pseudonym": "armostrong_79",
+    "disease": ["PTSD","Stress"]
+  }
+]

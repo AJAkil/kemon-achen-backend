@@ -13,7 +13,7 @@ const PostSchema = new mongoose.Schema(
     tags: [
       {
         type: mongoose.Schema.ObjectId,
-        ref: "Tag",
+        ref: "Disease",
       },
     ],
     voteCount: Number,

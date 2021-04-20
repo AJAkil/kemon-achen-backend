@@ -10,7 +10,7 @@ dotenv.config({ path: "./config/config.env" });
 // const Bootcamp = require("./models/Bootcamp");
 // const Course = require("./models/Course");
 // const User = require("./models/Users");
-const Tag = require("./models/Tag");
+const Disease = require("./models/Disease");
 const Test = require("./models/Test");
 const RegularUser = require("./models/RegularUser");
 const Community = require("./models/Community");
@@ -62,7 +62,7 @@ const comments = JSON.parse(
 // Import into DB
 const importData = async () => {
   try {
-    //await Tag.create(tags);
+    //await Disease.create(tags);
     //await ProfessionalUser.create(professionalUsers);
     //await Test.create(tests);
     // RegularUser.create(regularUsers);
@@ -79,7 +79,7 @@ const importData = async () => {
 // Delete data
 const deleteData = async () => {
   try {
-    await Tag.deleteMany();
+    await Disease.deleteMany();
     await Test.deleteMany();
     await RegularUser.deleteMany();
     await Community.deleteMany();

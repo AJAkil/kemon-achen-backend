@@ -3,7 +3,12 @@ const User = require("./User");
 
 const RegularUserSchema = new mongoose.Schema({
   pseudonym: String,
-  disease: [String],
+  currentDiseases: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: "Disease",
+    },
+  ],
   testInfo: [
     {
       test: {
@@ -11,6 +16,15 @@ const RegularUserSchema = new mongoose.Schema({
         ref: "Test",
       },
       score: Number,
+    },
+  ],
+  history: [
+    {
+      disease: {
+        type: mongoose.Schema.ObjectId,
+        ref: "Disease",
+      },
+      startDate: Date,
     },
   ],
 });

@@ -6,7 +6,7 @@ const ProfessionalUserSchema = new mongoose.Schema({
     type: String,
     maxLength: [500, "About cannot be more than 500 characters long"],
   },
-  verified: { type: Boolean, default: false },
+  verified: { type: Boolean, default: true },
   license: { type: String, required: true },
   licenseIssued: Date,
   qualification: {
@@ -18,7 +18,7 @@ const ProfessionalUserSchema = new mongoose.Schema({
   tags: [
     {
       type: mongoose.Schema.ObjectId,
-      ref: "Tag",
+      ref: "Disease",
     },
   ],
 });

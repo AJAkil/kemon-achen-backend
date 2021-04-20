@@ -6,6 +6,7 @@ const TestSchema = new mongoose.Schema(
     questions: [
       {
         text: String,
+        timesTaken: Number,
         scale: Number,
         sentiment: {
           type: String,
@@ -29,6 +30,11 @@ const TestSchema = new mongoose.Schema(
     community: {
       type: mongoose.Schema.ObjectId,
       ref: "Community",
+    },
+    postedBy: {
+      type: mongoose.Schema.ObjectId,
+      ref: "User",
+      required: true,
     },
   },
   { timestamps: true }

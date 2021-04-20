@@ -11,7 +11,7 @@ const CommunitySchema = new mongoose.Schema({
   tags: [
     {
       type: mongoose.Schema.ObjectId,
-      ref: "Tag",
+      ref: "Disease",
     },
   ],
   users: [

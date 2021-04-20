@@ -64,6 +64,12 @@ const UserSchema = new mongoose.Schema(
         ref: "Community",
       },
     ],
+    savedPosts: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "Post",
+      },
+    ],
   },
   baseOptions
 );

@@ -13,9 +13,8 @@ const ProfessionalUserSchema = new mongoose.Schema({
     type: [String],
     required: [true, "Please Add qualifications"],
   },
-  specialization: [String],
   rank: Number,
-  tags: [
+  specialization: [
     {
       type: mongoose.Schema.ObjectId,
       ref: "Disease",

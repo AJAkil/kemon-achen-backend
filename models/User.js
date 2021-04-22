@@ -18,10 +18,7 @@ const UserSchema = new mongoose.Schema(
       minlength: 6,
       select: false, //won't return password when we call user by API
     },
-    name: {
-      type: String,
-      required: [true, "Please add a name"],
-    },
+    name: String,
     email: {
       type: String,
       match: [

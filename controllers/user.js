@@ -3,15 +3,24 @@ const ProfessionalUser = require("../models/ProfessionalUser");
 const RegularUser = require("../models/RegularUser");
 const ErrorResponse = require("../utils/errorResponse");
 const asyncHandler = require("../middleware/async");
+const { sendTokenResponse } = require('../utils/helperMethods');
 
 // @desc     Signup Regular User
 // @route    POST /api/v1/user/regular/signup
 // @access   Public
 exports.signupRegularUser = asyncHandler(async (req, res, next) => {
+
   const { role, email, password } = req.body;
 
+  // Check if an user with the same email exist in the database
+  const user = await User.findOne({ email: email });
+
+  if(user){
+     return next(new ErrorResponse('This email is already registered', 400))
+  }
+
   if (role !== "regular") {
-    return next(new ErrorResponse('Wrong role in request body. Role must be regular.'))
+    return next(new ErrorResponse('Wrong role in request body. Role must be regular.', 400))
   }
 
   // Create Regular User
@@ -46,9 +55,17 @@ exports.signupProfessionalUser = asyncHandler(async (req, res, next) => {
     specialization,
   } = req.body;
 
+  // Check if an user with the same email exist in the database
+  // Check for the user
+  const user = await User.findOne({ email: email });
+
+  if(user){
+     return next(new ErrorResponse('This email is already registered', 400))
+  }
+
 
   if (role !== "professional") {
-    return next(new ErrorResponse('Wrong role in request body. Role must be professional'))
+    return next(new ErrorResponse('Wrong role in request body. Role must be professional', 400))
   }
 
   // Create Regular User
@@ -122,12 +139,3 @@ exports.getMe = asyncHandler(async (req, res, next) => {
   });
 });
 
-// Get token from model, create cookie and send response
-const sendTokenResponse = (user, statusCode, res, responseObject) => {
-  // Create token
-  const token = user.getSignedJwtToken();
-
-  responseObject.token = token;
-
-  res.status(statusCode).json(responseObject);
-};

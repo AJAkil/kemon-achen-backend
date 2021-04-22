@@ -62,7 +62,7 @@ const comments = JSON.parse(
 // Import into DB
 const importData = async () => {
   try {
-    //await Disease.create(tags);
+    await Disease.create(tags);
     //await ProfessionalUser.create(professionalUsers);
     //await Test.create(tests);
     // RegularUser.create(regularUsers);

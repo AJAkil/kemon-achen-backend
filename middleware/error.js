@@ -8,7 +8,7 @@ const errorHandler = (err, req, res, next) => {
   error.message = err.message;
 
   // Log to console for dev
-  //console.log('pera?',err);
+  console.log('pera?',err);
 
   // Mongoose bad objectId
   if (err.name === "CastError") {
@@ -31,8 +31,7 @@ const errorHandler = (err, req, res, next) => {
   //error = new ErrorResponse(message, statusCode);
 
   res.status(error.statusCode || 404).json({
-    success: false,
-    error: error.message || "General Error",
+    message: error.message || "General Error",
   });
 };
 

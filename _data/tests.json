@@ -1,0 +1,25 @@
+[
+  {
+    "name": "sample test",
+    "questions": [
+      {
+        "text": "How strong are your outbursts?",
+        "scale": "10",
+        "sentiment": "positive",
+        "depression": {
+          "high": "100",
+          "low": "0"
+        },
+        "anxiety": {
+          "high": "100",
+          "low": "0"
+        },
+        "stress": {
+          "high": "100",
+          "low": "0"
+        }
+      }
+    ],
+    "community": "607d6e9885c38d39f075c9eb"
+  }
+]

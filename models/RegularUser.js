@@ -1,21 +1,34 @@
 const mongoose = require("mongoose");
-const User = require("./Users");
+const User = require("./User");
 
-const RegularUser = User.discriminator(
-  "RegularUser",
-  new mongoose.Schema({
-    pseudonym: String,
-    disease: [String],
-    testInfo: [
-      {
-        test: {
-          type: mongoose.Schema.ObjectId,
-          ref: "Test",
-        },
-        score: Number,
+const RegularUserSchema = new mongoose.Schema({
+  pseudonym: String,
+  currentDiseases: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: "Disease",
+    },
+  ],
+  testInfo: [
+    {
+      test: {
+        type: mongoose.Schema.ObjectId,
+        ref: "Test",
       },
-    ],
-  })
-);
+      score: Number,
+    },
+  ],
+  history: [
+    {
+      disease: {
+        type: mongoose.Schema.ObjectId,
+        ref: "Disease",
+      },
+      startDate: Date,
+    },
+  ],
+});
+
+const RegularUser = User.discriminator("RegularUser", RegularUserSchema);
 
 module.exports = RegularUser;

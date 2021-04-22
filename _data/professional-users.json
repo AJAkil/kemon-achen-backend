@@ -1,0 +1,25 @@
+[
+  {
+    "role": "professional",
+    "password": "123456",
+    "name": "Fahim Morshed",
+    "email": "fahim@gmail.com",
+    "phone": "01770615022",
+    "description": "This is Blank",
+    "address": "Thakurgaon, Bangladesh",
+    "dateOfBirth": "1/1/1997",
+    "about": "I am expert in treating people with PTSD related to war and crime",
+    "license": "12233445343",
+    "licenseIssued": "2-2-2012",
+    "qualifications": [
+      "MBBS",
+      "MD"
+    ],
+    "specialization":["PTSD","Stress and Anger Management"],
+    "rank": "0",
+    "tags": [
+      "607d6dbef0d09133908d5062",
+      "607d6dbef0d09133908d5062"
+    ]
+  }
+]

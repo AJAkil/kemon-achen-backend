@@ -2,6 +2,9 @@ const User = require("../models/User");
 const ProfessionalUser = require("../models/ProfessionalUser");
 const RegularUser = require("../models/RegularUser");
 const Disease = require("../models/Disease");
+const Post = require("../models/Post");
+const Comment = require("../models/Comment");
+const Community = require("../models/Community");
 const ErrorResponse = require("../utils/errorResponse");
 const asyncHandler = require("../middleware/async");
 const { sendTokenResponse } = require('../utils/helperMethods');
@@ -104,7 +107,7 @@ exports.signupProfessionalUser = asyncHandler(async (req, res, next) => {
 });
 
 // @desc     Login User
-// @route    POST /api/v1/auth/login
+// @route    POST /api/v1/user/login
 // @access     Public
 exports.login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
@@ -141,9 +144,9 @@ exports.login = asyncHandler(async (req, res, next) => {
   sendTokenResponse(user, 200, res, responseObject);
 });
 
-// @desc     Login User
+// @desc     gets an user
 // @route    GET /api/v1/auth/me
-// @access     Private
+// @access   Private
 exports.getMe = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user.id);
 
@@ -151,5 +154,93 @@ exports.getMe = asyncHandler(async (req, res, next) => {
     success: true,
     data: user,
   });
+});
+
+
+// @desc     gets all posts of an user
+// @route    GET /api/v1/user/:userid/posts
+// @access   Private
+exports.getUserPosts = asyncHandler(async (req, res, next) => {
+
+  // find user first
+  const user = await User.findById(req.params.userid);
+
+  // check to see if user exists on the database
+  if (!user) {
+    return next(
+      new ErrorResponse(`User not found with the id ${req.params.id}`, 404)
+    );
+  }
+
+  // find posts in Post collection
+  let posts = await Post.find({
+    "postedBy" : {
+      $in: user._id
+    }
+  }).select(['title', 'content', 'voteCount', 'comments', 'createdAt']).populate('community', ['name', 'image'])
+
+  //posts.populate('communities');
+  //console.log(posts);
+
+  //console.log(posts)
+
+  // find comments of the posts
+  // let comments = await Comment.find({
+  //   '_id': {
+  //     $in: posts[1].comments[0]
+  //   }
+  // })
+
+  let responseArray = []
+  let responseObject = {}
+  // let communityToPostTracker = { }
+
+  for (let i = 0; i < posts.length; i++) {
+    const post = posts[i];
+    responseObject._id = post._id;
+    responseObject.title = post.title
+    responseObject.content = post.content;
+    responseObject.voteCount = post.voteCount
+    responseObject.commentCount = post.comments.length
+    responseObject.community = post.community;
+    responseObject.createdAt = Date.now() - post.createdAt;
+
+    responseArray.push(responseObject);
+    //communityToPostTracker[post.community].push(i);
+    responseObject = {};
+  }
+
+  // //console.log(responseArray)
+
+  // let postCommunities = posts.map( post => post.community)
+  // console.log(postCommunities);
+  
+  // // Search for communities in the database
+  // let communities = await Community.find({
+  //     '_id': postCommunities
+  //   })
+
+  // console.log(communities)
+  
+  // let communityProperties = communities.map(comm => {
+  //   let properties = {
+  //     _id: comm._id,
+  //     name: comm.name,
+  //     avatar: comm.image
+  //   }
+  //   return properties;
+  // })
+
+  // console.log(communityProperties);
+  
+  // communityProperties.forEach( comm => {
+
+  //   responseArray[].community = comm
+  // })
+
+  // console.log(responseArray)
+
+
+  res.status(200).json({ success: true, data: responseArray });
 });
 

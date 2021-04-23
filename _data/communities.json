@@ -2,12 +2,27 @@
   {
     "name": "PTSD",
     "isPrivate": false,
-    "description": "Blank for now",
+    "description": "A community to get help about PTSD",
     "tags": [
-      "607d69997d86b41ef04e3dc5"
+      "6081da3e90c4f35054cd16e8"
     ],
     "users": [
-      "607d6dbef0d09133908d5062"
+      "6081e0cebd26be44402de3ce",
+      "60830a908fc20123c40f10bf",
+      "60830ac18fc20123c40f10c0"
+    ]
+  },
+  {
+    "name": "Stress",
+    "isPrivate": false,
+    "description": "We care about your stress, let's heal together!",
+    "tags": [
+      "6081da3e90c4f35054cd16e9"
+    ],
+    "users": [
+      "6081e5a547e01753145ed251",
+      "60830a908fc20123c40f10bf",
+      "60830ac18fc20123c40f10c0"
     ]
   }
 ]

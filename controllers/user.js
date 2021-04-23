@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const ProfessionalUser = require("../models/ProfessionalUser");
 const RegularUser = require("../models/RegularUser");
+const Disease = require("../models/Disease");
 const ErrorResponse = require("../utils/errorResponse");
 const asyncHandler = require("../middleware/async");
 const { sendTokenResponse } = require('../utils/helperMethods');
@@ -52,7 +53,7 @@ exports.signupProfessionalUser = asyncHandler(async (req, res, next) => {
     verified,
     license,
     licenseIssued,
-    specialization,
+    specializations,
   } = req.body;
 
   // Check if an user with the same email exist in the database
@@ -68,6 +69,19 @@ exports.signupProfessionalUser = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('Wrong role in request body. Role must be professional', 400))
   }
 
+  //console.log(specializations)
+  // find the name of the disease tags from the database
+  let specialization = await Disease.find({
+    "title" : {
+      $in: specializations
+    }
+  })
+
+  //console.log(specialization)
+
+  specialization = specialization.map( tags => tags._id)
+
+  //console.log(specialization);
   // Create Regular User
   const professionalUser = await ProfessionalUser.create({
     email,
@@ -102,11 +116,11 @@ exports.login = asyncHandler(async (req, res, next) => {
 
   // Check for the user
   const user = await User.findOne({ email: email }).select("+password");
-  console.log(user);
+  //console.log(user);
 
   // Validate User
   if (!user) {
-    console.log("here");
+    //console.log("here");
     return next(new ErrorResponse("Invalid Credentials: Wrong Email!", 401));
   }
 

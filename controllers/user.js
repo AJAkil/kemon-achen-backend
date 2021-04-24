@@ -41,7 +41,7 @@ exports.signupRegularUser = asyncHandler(async (req, res, next) => {
   let responseObject = {
     _id: regularUser.id,
     role: regularUser.role,
-    avatar: regularUser.image,
+    image: regularUser.image,
     message:
       "Welcome to Kemon Achen! Let's take a step towards healing together <3",
   };
@@ -107,7 +107,7 @@ exports.signupProfessionalUser = asyncHandler(async (req, res, next) => {
   let responseObject = {
     _id: professionalUser.id,
     role: professionalUser.role,
-    avatar: professionalUser.image,
+    image: professionalUser.image,
     message: "You are awaiting verification",
   };
 
@@ -187,67 +187,21 @@ exports.getUserPosts = asyncHandler(async (req, res, next) => {
     .select(["title", "content", "voteCount", "comments", "createdAt"])
     .populate("community", ["name", "image"]);
 
-  //posts.populate('communities');
-  //console.log(posts);
-
-  //console.log(posts)
-
-  // find comments of the posts
-  // let comments = await Comment.find({
-  //   '_id': {
-  //     $in: posts[1].comments[0]
-  //   }
-  // })
-
   let responseArray = [];
-  let responseObject = {};
-  // let communityToPostTracker = { }
 
-  for (let i = 0; i < posts.length; i++) {
-    const post = posts[i];
-    responseObject._id = post._id;
-    responseObject.title = post.title;
-    responseObject.content = post.content;
-    responseObject.voteCount = post.voteCount;
-    responseObject.commentCount = post.comments.length;
-    responseObject.community = post.community;
-    responseObject.createdAt = Date.now() - post.createdAt;
+  posts.forEach((post) => {
+    responseArray.push({
+      _id: post._id,
+      title: post.title,
+      content: post.content,
+      voteCount: post.voteCount,
+      commentCount: post.comments.length,
+      community: post.community,
+      createdAt: getTimeDiff(post.createdAt),
+    });
+  });
 
-    responseArray.push(responseObject);
-    responseObject = {};
-  }
-
-  // //console.log(responseArray)
-
-  // let postCommunities = posts.map( post => post.community)
-  // console.log(postCommunities);
-
-  // // Search for communities in the database
-  // let communities = await Community.find({
-  //     '_id': postCommunities
-  //   })
-
-  // console.log(communities)
-
-  // let communityProperties = communities.map(comm => {
-  //   let properties = {
-  //     _id: comm._id,
-  //     name: comm.name,
-  //     avatar: comm.image
-  //   }
-  //   return properties;
-  // })
-
-  // console.log(communityProperties);
-
-  // communityProperties.forEach( comm => {
-
-  //   responseArray[].community = comm
-  // })
-
-  // console.log(responseArray)
-
-  res.status(200).json({ success: true, data: responseArray });
+  res.status(200).json({ data: responseArray });
 });
 
 // @desc     gets all comments of an user
@@ -289,5 +243,5 @@ exports.getUserComments = asyncHandler(async (req, res, next) => {
     });
   });
 
-  res.status(200).json({ success: true, data: responseArray });
+  res.status(200).json({ data: responseArray });
 });

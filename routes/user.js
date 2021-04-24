@@ -15,7 +15,7 @@ router.post("/regular/signup", signupRegularUser);
 router.post("/professional/signup", signupProfessionalUser);
 router.post("/login", login);
 router.get("/me", protect, getMe);
-router.get("/:userid/posts", getUserPosts);
-router.get("/:userid/comments", getUserComments);
+router.get("/:userid/posts", protect, getUserPosts);
+router.get("/:userid/comments", protect, getUserComments);
 
 module.exports = router;

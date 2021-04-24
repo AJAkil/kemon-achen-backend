@@ -7,24 +7,28 @@ const Comment = require("../models/Comment");
 const Community = require("../models/Community");
 const ErrorResponse = require("../utils/errorResponse");
 const asyncHandler = require("../middleware/async");
-const { sendTokenResponse } = require('../utils/helperMethods');
+const { sendTokenResponse, getTimeDiff } = require("../utils/helperMethods");
 
 // @desc     Signup Regular User
 // @route    POST /api/v1/user/regular/signup
 // @access   Public
 exports.signupRegularUser = asyncHandler(async (req, res, next) => {
-
   const { role, email, password } = req.body;
 
   // Check if an user with the same email exist in the database
   const user = await User.findOne({ email: email });
 
-  if(user){
-     return next(new ErrorResponse('This email is already registered', 400))
+  if (user) {
+    return next(new ErrorResponse("This email is already registered", 400));
   }
 
   if (role !== "regular") {
-    return next(new ErrorResponse('Wrong role in request body. Role must be regular.', 400))
+    return next(
+      new ErrorResponse(
+        "Wrong role in request body. Role must be regular.",
+        400
+      )
+    );
   }
 
   // Create Regular User
@@ -63,26 +67,30 @@ exports.signupProfessionalUser = asyncHandler(async (req, res, next) => {
   // Check for the user
   const user = await User.findOne({ email: email });
 
-  if(user){
-     return next(new ErrorResponse('This email is already registered', 400))
+  if (user) {
+    return next(new ErrorResponse("This email is already registered", 400));
   }
 
-
   if (role !== "professional") {
-    return next(new ErrorResponse('Wrong role in request body. Role must be professional', 400))
+    return next(
+      new ErrorResponse(
+        "Wrong role in request body. Role must be professional",
+        400
+      )
+    );
   }
 
   //console.log(specializations)
   // find the name of the disease tags from the database
   let specialization = await Disease.find({
-    "title" : {
-      $in: specializations
-    }
-  })
+    title: {
+      $in: specializations,
+    },
+  });
 
   //console.log(specialization)
 
-  specialization = specialization.map( tags => tags._id)
+  specialization = specialization.map((tags) => tags._id);
 
   //console.log(specialization);
   // Create Regular User
@@ -156,12 +164,10 @@ exports.getMe = asyncHandler(async (req, res, next) => {
   });
 });
 
-
 // @desc     gets all posts of an user
 // @route    GET /api/v1/user/:userid/posts
 // @access   Private
 exports.getUserPosts = asyncHandler(async (req, res, next) => {
-
   // find user first
   const user = await User.findById(req.params.userid);
 
@@ -174,10 +180,12 @@ exports.getUserPosts = asyncHandler(async (req, res, next) => {
 
   // find posts in Post collection
   let posts = await Post.find({
-    "postedBy" : {
-      $in: user._id
-    }
-  }).select(['title', 'content', 'voteCount', 'comments', 'createdAt']).populate('community', ['name', 'image'])
+    postedBy: {
+      $in: user._id,
+    },
+  })
+    .select(["title", "content", "voteCount", "comments", "createdAt"])
+    .populate("community", ["name", "image"]);
 
   //posts.populate('communities');
   //console.log(posts);
@@ -191,22 +199,21 @@ exports.getUserPosts = asyncHandler(async (req, res, next) => {
   //   }
   // })
 
-  let responseArray = []
-  let responseObject = {}
+  let responseArray = [];
+  let responseObject = {};
   // let communityToPostTracker = { }
 
   for (let i = 0; i < posts.length; i++) {
     const post = posts[i];
     responseObject._id = post._id;
-    responseObject.title = post.title
+    responseObject.title = post.title;
     responseObject.content = post.content;
-    responseObject.voteCount = post.voteCount
-    responseObject.commentCount = post.comments.length
+    responseObject.voteCount = post.voteCount;
+    responseObject.commentCount = post.comments.length;
     responseObject.community = post.community;
     responseObject.createdAt = Date.now() - post.createdAt;
 
     responseArray.push(responseObject);
-    //communityToPostTracker[post.community].push(i);
     responseObject = {};
   }
 
@@ -214,14 +221,14 @@ exports.getUserPosts = asyncHandler(async (req, res, next) => {
 
   // let postCommunities = posts.map( post => post.community)
   // console.log(postCommunities);
-  
+
   // // Search for communities in the database
   // let communities = await Community.find({
   //     '_id': postCommunities
   //   })
 
   // console.log(communities)
-  
+
   // let communityProperties = communities.map(comm => {
   //   let properties = {
   //     _id: comm._id,
@@ -232,7 +239,7 @@ exports.getUserPosts = asyncHandler(async (req, res, next) => {
   // })
 
   // console.log(communityProperties);
-  
+
   // communityProperties.forEach( comm => {
 
   //   responseArray[].community = comm
@@ -240,7 +247,47 @@ exports.getUserPosts = asyncHandler(async (req, res, next) => {
 
   // console.log(responseArray)
 
-
   res.status(200).json({ success: true, data: responseArray });
 });
 
+// @desc     gets all comments of an user
+// @route    GET /api/v1/user/:userid/comments
+// @access   Private
+exports.getUserComments = asyncHandler(async (req, res, next) => {
+  // find user first
+  const user = await User.findById(req.params.userid);
+
+  // check to see if user exists on the database
+  if (!user) {
+    return next(
+      new ErrorResponse(`User not found with the id ${req.params.id}`, 404)
+    );
+  }
+
+  // find posts in Post collection
+  let comments = await Comment.find({
+    postedBy: {
+      $in: user._id,
+    },
+  })
+    .select(["content", "createdAt"])
+    .populate({
+      path: "parentPost",
+      select: "_id title",
+    });
+
+  console.log(getTimeDiff(comments[0].createdAt));
+
+  let responseArray = [];
+
+  comments.forEach((comment) => {
+    responseArray.push({
+      _id: comment.id,
+      content: comment.content,
+      parentPost: comment.parentPost,
+      createdAt: getTimeDiff(comment.createdAt),
+    });
+  });
+
+  res.status(200).json({ success: true, data: responseArray });
+});

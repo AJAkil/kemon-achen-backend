@@ -5,6 +5,7 @@ const {
   login,
   getMe,
   getUserPosts,
+  getUserComments
 } = require("../controllers/user");
 
 const router = express.Router();
@@ -15,5 +16,6 @@ router.post("/professional/signup", signupProfessionalUser);
 router.post("/login", login);
 router.get("/me", protect, getMe);
 router.get("/:userid/posts", getUserPosts);
+router.get("/:userid/comments", getUserComments);
 
 module.exports = router;

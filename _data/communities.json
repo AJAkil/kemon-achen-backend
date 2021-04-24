@@ -1,28 +1,13 @@
 [
   {
-    "name": "PTSD",
+    "name": "Anxiety",
     "isPrivate": false,
-    "description": "A community to get help about PTSD",
+    "description": "We care about your Anxiety, let's heal together!",
     "tags": [
-      "6081da3e90c4f35054cd16e8"
+      "608459ad7b0b8f46785d8c15"
     ],
     "users": [
-      "6081e0cebd26be44402de3ce",
-      "60830a908fc20123c40f10bf",
-      "60830ac18fc20123c40f10c0"
-    ]
-  },
-  {
-    "name": "Stress",
-    "isPrivate": false,
-    "description": "We care about your stress, let's heal together!",
-    "tags": [
-      "6081da3e90c4f35054cd16e9"
-    ],
-    "users": [
-      "6081e5a547e01753145ed251",
-      "60830a908fc20123c40f10bf",
-      "60830ac18fc20123c40f10c0"
+      "6081e5a547e01753145ed251"
     ]
   }
 ]

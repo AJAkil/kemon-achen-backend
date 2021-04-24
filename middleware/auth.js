@@ -16,6 +16,8 @@ exports.protect = asyncHandler(async (req, res, next) => {
   //     token = req.cookies.token;
   // }
 
+  //console.log(token);
+
   if (!token) {
     return next(new ErrorResponse("Not authorized to access this route"), 401);
   }
@@ -26,6 +28,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
     //console.log(decoded);
 
     req.user = await User.findById(decoded.id);
+    console.log(req.user.email);
     next();
     
   } catch {

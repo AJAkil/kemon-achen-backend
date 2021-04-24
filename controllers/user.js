@@ -7,6 +7,7 @@ const Comment = require("../models/Comment");
 const Community = require("../models/Community");
 const ErrorResponse = require("../utils/errorResponse");
 const asyncHandler = require("../middleware/async");
+const mongoose = require("mongoose");
 const { sendTokenResponse, getTimeDiff } = require("../utils/helperMethods");
 
 // @desc     Signup Regular User
@@ -145,7 +146,7 @@ exports.login = asyncHandler(async (req, res, next) => {
   let responseObject = {
     _id: user.id,
     role: user.role,
-    avatar: user.image,
+    image: user.image,
     name: "no name",
   };
 
@@ -250,7 +251,7 @@ exports.getUserComments = asyncHandler(async (req, res, next) => {
 // @route    GET /api/v1/user/communities
 // @access   Private
 exports.getUserCommunities = asyncHandler(async (req, res, next) => {
-  // find posts in Post collection
+  // find communities of a user
   let communities = await Community.find({
     users: {
       $in: req.user._id,
@@ -258,4 +259,46 @@ exports.getUserCommunities = asyncHandler(async (req, res, next) => {
   }).select(["name", "image"]);
 
   res.status(200).json({ data: communities });
+});
+
+// @desc     gets all communties of a logged in user
+// @route    GET /api/v1/user/community/:communityId/join
+// @access   Private
+exports.joinCommunity = asyncHandler(async (req, res, next) => {
+  //console.log(typeof(req.params.communityId));
+
+  let id = mongoose.Types.ObjectId(req.params.communityId);
+  //console.log(typeof(id));
+
+  // check to see if the user belongs to the certain community
+  let community = await Community.find({
+    _id: id,
+    users: {
+      $in: req.user._id,
+    },
+  });
+
+  console.log(community);
+  if (community.length != 0) {
+    return next(
+      new Error(
+        `User with id: ${req.user._id} has already joined the community`,
+        400
+      )
+    );
+  }
+
+  const updatedCommunity = await Community.findByIdAndUpdate(
+    id,
+    { $push: { users: req.user._id } },
+    { new: true, upsert: true }
+  );
+
+  console.log(updatedCommunity);
+
+  if(!updatedCommunity){
+    return next(new ErrorResponse(`Failed to update Community with id: ${id} with User: ${req.user._id}`))
+  }
+
+  res.status(200).json({ data: "You are added to the community successfully" });
 });

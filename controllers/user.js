@@ -245,3 +245,17 @@ exports.getUserComments = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({ data: responseArray });
 });
+
+// @desc     gets all communties of a logged in user
+// @route    GET /api/v1/user/communities
+// @access   Private
+exports.getUserCommunities = asyncHandler(async (req, res, next) => {
+  // find posts in Post collection
+  let communities = await Community.find({
+    users: {
+      $in: req.user._id,
+    },
+  }).select(["name", "image"]);
+
+  res.status(200).json({ data: communities });
+});

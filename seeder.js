@@ -66,9 +66,9 @@ const importData = async () => {
     //await ProfessionalUser.create(professionalUsers);
     //await Test.create(tests);
     // RegularUser.create(regularUsers);
-    //await Community.create(communities);
-    await Post.create(posts);
-    await Comment.create(comments);
+    await Community.create(communities);
+    //await Post.create(posts);
+    //await Comment.create(comments);
     console.log("Data Imported...".green.inverse);
     process.exit();
   } catch (err) {
@@ -79,10 +79,11 @@ const importData = async () => {
 // Delete data
 const deleteData = async () => {
   try {
-    await Disease.deleteMany();
-    await Test.deleteMany();
-    await RegularUser.deleteMany();
-    await Community.deleteMany();
+    //await Disease.deleteMany();
+    // await Test.deleteMany();
+    await Comment.deleteMany();
+    //await RegularUser.deleteMany();
+    //await Community.deleteMany();
     //await User.deleteMany();
     console.log("Data Destroyed...".red.inverse);
     process.exit();

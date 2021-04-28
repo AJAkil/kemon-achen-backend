@@ -8,6 +8,11 @@ const CommentSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    parentPost:{
+      type: mongoose.Schema.ObjectId,
+      ref: "Post",
+      required: true
+    },
     asPseudo: { type: Boolean, default: false },
     voteCount: Number,
     replies: [
@@ -17,7 +22,9 @@ const CommentSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
+
+
 
 module.exports = mongoose.model("Comment", CommentSchema);

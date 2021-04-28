@@ -31,8 +31,7 @@ const errorHandler = (err, req, res, next) => {
   //error = new ErrorResponse(message, statusCode);
 
   res.status(error.statusCode || 404).json({
-    success: false,
-    error: error.message || "General Error",
+    message: error.message || "General Error",
   });
 };
 

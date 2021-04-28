@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const baseOptions = {
   discriminatorKey: "usertype", // our discriminator key
@@ -25,6 +27,7 @@ const UserSchema = new mongoose.Schema(
         /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
         "Please add a valid email here",
       ],
+      required: [true, "Please add an email"]
     },
     phone: {
       type: String,
@@ -34,10 +37,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       maxLength: [500, "Description cannot be more than 500 characters long"],
     },
-    address: {
-      type: String,
-      required: [true, "Please add an address"],
-    },
+    address: String,
     location: {
       type: {
         type: String,
@@ -70,5 +70,30 @@ const UserSchema = new mongoose.Schema(
   },
   baseOptions
 );
+
+// Encrypt password using bcryptjs
+// we want to encrypt before we save the data to the database
+UserSchema.pre("save", async function (next) {
+  // check to see if we modified the password or not, if not move on to the next middleware
+  if (!this.isModified("password")) {
+    next();
+  }
+
+  // do the following operation if we modify the password
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+});
+
+// Sign JWT and return
+UserSchema.methods.getSignedJwtToken = function () {
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE,
+  });
+};
+
+// Match user entered password to hashed pass in db
+UserSchema.methods.matchPassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password); // here this is the object that will call this
+};
 
 module.exports = mongoose.model("User", UserSchema);

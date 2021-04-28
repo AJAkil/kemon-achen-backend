@@ -28,7 +28,7 @@ const PostSchema = new mongoose.Schema(
       ref: "Community",
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("Post", PostSchema);

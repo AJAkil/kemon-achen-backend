@@ -85,3 +85,24 @@ exports.likePost = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({ data: message });
 });
+
+// @desc     create a post by a logged in user
+// @route    POST /api/v1/post/create
+// @access   Private
+exports.createPost = asyncHandler(async (req, res, next) => {
+  res.status(200).json({ data: message });
+});
+
+// @desc     create a comment of a post by a logged in user
+// @route    POST /api/v1/post/:postId/comment/create
+// @access   Private
+exports.createComment = asyncHandler(async (req, res, next) => {
+  res.status(200).json({ data: message });
+});
+
+// @desc     create a reply of a comment by a logged in user
+// @route    POST /post/:postId/comment/:commentId/reply/create
+// @access   Private
+exports.createReply = asyncHandler(async (req, res, next) => {
+  res.status(200).json({ data: message });
+});

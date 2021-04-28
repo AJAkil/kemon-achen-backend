@@ -27,9 +27,29 @@ exports.getTimeDiff = (datetime) => {
   let minutes = Math.floor(milisecDiff / 1000 / 60);
   let seconds = Math.floor(milisecDiff / 1000);
 
-  if (months != 0) return months+" "+"months";
-  else if (days != 0) return days+" "+"days";
-  else if (hours != 0) return hours+" "+"hours";
-  else if (minutes != 0) return minutes+" "+"minutes";
-  else if (seconds != 0) return seconds+" "+"seconds";
+  if (months != 0) return months + " " + "months";
+  else if (days != 0) return days + " " + "days";
+  else if (hours != 0) return hours + " " + "hours";
+  else if (minutes != 0) return minutes + " " + "minutes";
+  else if (seconds != 0) return seconds + " " + "seconds";
+};
+
+exports.removeItemOnce = (arr, value) => {
+  var index = arr.indexOf(value);
+  if (index > -1) {
+    arr.splice(index, 1);
+  }
+  return arr;
+};
+
+exports.removeItemAll = (arr, value) => {
+  var i = 0;
+  while (i < arr.length) {
+    if (arr[i] === value) {
+      arr.splice(i, 1);
+    } else {
+      ++i;
+    }
+  }
+  return arr;
 };

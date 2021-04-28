@@ -117,7 +117,7 @@ exports.signupProfessionalUser = asyncHandler(async (req, res, next) => {
 
 // @desc     Login User
 // @route    POST /api/v1/user/login
-// @access     Public
+// @access   Public
 exports.login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
 

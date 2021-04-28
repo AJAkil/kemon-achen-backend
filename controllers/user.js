@@ -296,8 +296,12 @@ exports.joinCommunity = asyncHandler(async (req, res, next) => {
 
   console.log(updatedCommunity);
 
-  if(!updatedCommunity){
-    return next(new ErrorResponse(`Failed to update Community with id: ${id} with User: ${req.user._id}`))
+  if (!updatedCommunity) {
+    return next(
+      new ErrorResponse(
+        `Failed to update Community with id: ${id} with User: ${req.user._id}`
+      )
+    );
   }
 
   res.status(200).json({ data: "You are added to the community successfully" });

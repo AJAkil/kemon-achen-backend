@@ -9,6 +9,7 @@ exports.sendTokenResponse = (user, statusCode, res, responseObject) => {
 };
 
 exports.getTimeDiff = (datetime) => {
+  //console.log('Given date time: ', datetime);
   let givenTime = new Date(datetime).getTime();
   let now = new Date().getTime();
 
@@ -26,6 +27,8 @@ exports.getTimeDiff = (datetime) => {
   let hours = Math.floor(milisecDiff / 1000 / 60 / 60);
   let minutes = Math.floor(milisecDiff / 1000 / 60);
   let seconds = Math.floor(milisecDiff / 1000);
+
+  //console.log(months, days, hours, minutes, seconds);
 
   if (months != 0) return months + " " + "months";
   else if (days != 0) return days + " " + "days";

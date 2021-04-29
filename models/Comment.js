@@ -3,6 +3,10 @@ const mongoose = require("mongoose");
 const CommentSchema = new mongoose.Schema(
   {
     content: String,
+    repliedTo: {
+      type: mongoose.Schema.ObjectId,
+      ref: "Comment",
+    },
     postedBy: {
       type: mongoose.Schema.ObjectId,
       ref: "User",

@@ -34,7 +34,7 @@ exports.getTimeDiff = (datetime) => {
   else if (days != 0) return days + " " + "days";
   else if (hours != 0) return hours + " " + "hours";
   else if (minutes != 0) return minutes + " " + "minutes";
-  else if (seconds != 0) return seconds + " " + "seconds";
+  else  return seconds + " " + "seconds";
 };
 
 exports.removeItemOnce = (arr, value) => {

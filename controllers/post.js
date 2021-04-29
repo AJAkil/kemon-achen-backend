@@ -8,11 +8,7 @@ const Community = require("../models/Community");
 const ErrorResponse = require("../utils/errorResponse");
 const asyncHandler = require("../middleware/async");
 const mongoose = require("mongoose");
-const {
-  sendTokenResponse,
-  getTimeDiff,
-  removeItemOnce,
-} = require("../utils/helperMethods");
+const { getTimeDiff, processComment } = require("../utils/helperMethods");
 
 // @desc     save a post by a logged in user
 // @route    GET /api/v1/post/:postId/save
@@ -115,6 +111,7 @@ exports.createPost = asyncHandler(async (req, res, next) => {
 exports.createComment = asyncHandler(async (req, res, next) => {
   req.body.postedBy = mongoose.Types.ObjectId(req.user.id);
   req.body.parentPost = mongoose.Types.ObjectId(req.params.postId);
+  req.body.repliedTo = null;
 
   const comment = await Comment.create(req.body);
   //console.log(comment._id);
@@ -143,12 +140,41 @@ exports.createComment = asyncHandler(async (req, res, next) => {
   res.status(200).json({ data: commentResponse });
 });
 
+
 // @desc     create a reply of a comment by a logged in user
 // @route    POST /post/:postId/comment/:commentId/reply/create
 // @access   Private
 exports.createReply = asyncHandler(async (req, res, next) => {
+  console.log(req.params.postId)
+  req.body.postedBy = mongoose.Types.ObjectId(req.user.id);
+  req.body.parentPost = mongoose.Types.ObjectId(req.params.postId);
+  req.body.repliedTo = mongoose.Types.ObjectId(req.params.commentId);
 
+  console.log(req.body);
 
+  const reply = await Comment.create(req.body);
+  //console.log(comment._id);
 
-  res.status(200).json({ data: message });
+  //Querying the required data
+  const replyResponse = await Comment
+    .find(reply._id)
+    .select(["_id", "content", "asPseudo", "voteCount", "createdAt"])
+    .populate({
+      path: "postedBy",
+      select: "_id name image rank",
+    })
+    .lean();
+
+  // editing the createdAt field
+  replyResponse[0].createdAt = getTimeDiff(replyResponse[0].createdAt);
+  console.log(replyResponse);
+
+  //pushing the newly created comment in the post field
+  await Comment.findByIdAndUpdate(
+    req.params.commentId,
+    { $push: { replies: replyResponse[0]._id } },
+    { new: true, upsert: true }
+  );
+
+  res.status(200).json({ data: "sex" });
 });

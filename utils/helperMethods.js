@@ -3,7 +3,7 @@ exports.sendTokenResponse = (user, statusCode, res, responseObject) => {
   // Create token
   const token = user.getSignedJwtToken();
 
-  responseObject.jwt = "Bearer "+token;
+  responseObject.jwt = "Bearer " + token;
 
   res.status(statusCode).json(responseObject);
 };
@@ -28,13 +28,13 @@ exports.getTimeDiff = (datetime) => {
   let minutes = Math.floor(milisecDiff / 1000 / 60);
   let seconds = Math.floor(milisecDiff / 1000);
 
-  //console.log(months, days, hours, minutes, seconds);
+  console.log(months, days, hours, minutes, seconds);
 
-  if (months != 0) return months + " " + "months";
-  else if (days != 0) return days + " " + "days";
-  else if (hours != 0) return hours + " " + "hours";
-  else if (minutes != 0) return minutes + " " + "minutes";
-  else  return seconds + " " + "seconds";
+  if (months != 0) return months + " " + "mo";
+  else if (days != 0) return days + " " + "d";
+  else if (hours != 0) return hours + " " + "h";
+  else if (minutes != 0) return minutes + " " + "m";
+  else return seconds + " " + "s";
 };
 
 exports.removeItemOnce = (arr, value) => {

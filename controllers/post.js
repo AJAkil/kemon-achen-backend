@@ -8,11 +8,13 @@ const Community = require("../models/Community");
 const ErrorResponse = require("../utils/errorResponse");
 const asyncHandler = require("../middleware/async");
 const mongoose = require("mongoose");
-const { getTimeDiff, processComment } = require("../utils/helperMethods");
+const { getTimeDiff } = require("../utils/helperMethods");
 
-// @desc     save a post by a logged in user
-// @route    GET /api/v1/post/:postId/save
-// @access   Private
+/**
+ * @desc     save a post by a logged in user
+ * @route    GET /api/v1/post/:postId/save
+ * @access   Private
+ */
 exports.savePost = asyncHandler(async (req, res, next) => {
   let id = mongoose.Types.ObjectId(req.params.postId);
   let message;
@@ -42,12 +44,14 @@ exports.savePost = asyncHandler(async (req, res, next) => {
     message = "The Post has been unsaved!";
   }
 
-  res.status(200).json({ data: message });
+  res.status(200).json({ message: message });
 });
 
-// @desc     like or unlike a post by a logged in user
-// @route    GET /api/v1/post/:postId/like
-// @access   Private
+/**
+ * @desc  like or unlike a post by a logged in user
+ * @route    GET /api/v1/post/:postId/like
+ * @access   Private
+ */
 exports.likePost = asyncHandler(async (req, res, next) => {
   //console.log(typeof(req.params.communityId));
 
@@ -79,12 +83,14 @@ exports.likePost = asyncHandler(async (req, res, next) => {
     );
   }
 
-  res.status(200).json({ data: message });
+  res.status(200).json({ message: message });
 });
 
-// @desc     create a post by a logged in user
-// @route    POST /api/v1/post/create
-// @access   Private
+/**
+ * @desc     create a post by a logged in user
+ * @route    POST /api/v1/post/create
+ * @access   Private
+ */
 exports.createPost = asyncHandler(async (req, res, next) => {
   console.log(req.body);
 
@@ -102,12 +108,14 @@ exports.createPost = asyncHandler(async (req, res, next) => {
   const post = await Post.create(req.body);
   console.log(post);
 
-  res.status(200).json({ data: "Your post has been created!" });
+  res.status(200).json({ message: "Your post has been created!" });
 });
 
-// @desc     create a comment of a post by a logged in user
-// @route    POST /api/v1/post/:postId/comment/create
-// @access   Private
+/**
+ * @desc  create a comment of a post by a logged in user
+ * @route    POST /api/v1/post/:postId/comment/create
+ * @access   Private
+ */
 exports.createComment = asyncHandler(async (req, res, next) => {
   req.body.postedBy = mongoose.Types.ObjectId(req.user.id);
   req.body.parentPost = mongoose.Types.ObjectId(req.params.postId);
@@ -140,9 +148,11 @@ exports.createComment = asyncHandler(async (req, res, next) => {
   res.status(200).json(commentResponse[0]);
 });
 
-// @desc     create a reply of a comment by a logged-in user
-// @route    POST /post/:postId/comment/:commentId/reply/create
-// @access   Private
+/**
+ * @desc     create a reply of a comment by a logged-in user
+ * @route    POST /post/:postId/comment/:commentId/reply/create
+ * @access   Private
+ */
 exports.createReply = asyncHandler(async (req, res, next) => {
   req.body.postedBy = mongoose.Types.ObjectId(req.user.id);
   req.body.parentPost = mongoose.Types.ObjectId(req.params.postId);

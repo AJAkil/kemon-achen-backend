@@ -10,9 +10,11 @@ const asyncHandler = require("../middleware/async");
 const mongoose = require("mongoose");
 const { sendTokenResponse, getTimeDiff } = require("../utils/helperMethods");
 
-// @desc     Signup Regular User
-// @route    POST /api/v1/user/regular/signup
-// @access   Public
+/**
+ * @desc     Signup Regular User
+ * @route    POST /api/v1/user/regular/signup
+ * @access   Public
+ */
 exports.signupRegularUser = asyncHandler(async (req, res, next) => {
   const { role, email, password } = req.body;
 
@@ -50,9 +52,11 @@ exports.signupRegularUser = asyncHandler(async (req, res, next) => {
   sendTokenResponse(regularUser, 200, res, responseObject);
 });
 
-// @desc     Signup Professional User
-// @route    POST /api/v1/user/professional/signup
-// @access   Public
+/**
+ * @desc     Signup Professional User
+ * @route    POST /api/v1/user/professional/signup
+ * @access   Public
+ */
 exports.signupProfessionalUser = asyncHandler(async (req, res, next) => {
   const {
     role,
@@ -115,9 +119,11 @@ exports.signupProfessionalUser = asyncHandler(async (req, res, next) => {
   sendTokenResponse(professionalUser, 200, res, responseObject);
 });
 
-// @desc     Login User
-// @route    POST /api/v1/user/login
-// @access   Public
+/**
+ * @desc     Login User
+ * @route    POST /api/v1/user/login
+ * @access   Public
+ */
 exports.login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -153,9 +159,11 @@ exports.login = asyncHandler(async (req, res, next) => {
   sendTokenResponse(user, 200, res, responseObject);
 });
 
-// @desc     gets an user
-// @route    GET /api/v1/auth/me
-// @access   Private
+/**
+ * @desc     gets an user
+ * @route    GET /api/v1/auth/me
+ * @access   Private
+ */
 exports.getMe = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user.id);
 
@@ -165,9 +173,11 @@ exports.getMe = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc     gets all posts of an user
-// @route    GET /api/v1/user/:userid/posts
-// @access   Private
+/**
+ * @desc     gets all posts of an user
+ * @route    GET /api/v1/user/:userid/posts
+ * @access   Private
+ */
 exports.getUserPosts = asyncHandler(async (req, res, next) => {
   // find user first
   const user = await User.findById(req.params.userid);
@@ -189,26 +199,21 @@ exports.getUserPosts = asyncHandler(async (req, res, next) => {
     .populate("community", ["name", "image"])
     .lean();
 
-  let responseArray = [];
+  //console.log(posts)
 
   posts.forEach((post) => {
-    responseArray.push({
-      _id: post._id,
-      title: post.title,
-      content: post.content,
-      voteCount: post.voteCount,
-      commentCount: post.comments.length,
-      community: post.community,
-      createdAt: getTimeDiff(post.createdAt),
-    });
+    post.createdAt = getTimeDiff(post.createdAt);
   });
+  //console.log(createdAt);
 
-  res.status(200).json({ data: responseArray });
+  res.status(200).json(posts);
 });
 
-// @desc     gets all comments of an user
-// @route    GET /api/v1/user/:userid/comments
-// @access   Private
+/**
+ * @desc     gets all comments of an user
+ * @route    GET /api/v1/user/:userid/comments
+ * @access   Private
+ */
 exports.getUserComments = asyncHandler(async (req, res, next) => {
   // find user first
   const user = await User.findById(req.params.userid);
@@ -230,27 +235,21 @@ exports.getUserComments = asyncHandler(async (req, res, next) => {
     .populate({
       path: "parentPost",
       select: "_id title",
-    });
-
-  console.log(getTimeDiff(comments[0].createdAt));
-
-  let responseArray = [];
+    })
+    .lean();
 
   comments.forEach((comment) => {
-    responseArray.push({
-      _id: comment.id,
-      content: comment.content,
-      parentPost: comment.parentPost,
-      createdAt: getTimeDiff(comment.createdAt),
-    });
+    comment.createdAt = getTimeDiff(comment.createdAt);
   });
 
-  res.status(200).json(responseArray);
+  res.status(200).json(comments);
 });
 
-// @desc     gets all communties of a logged in user
-// @route    GET /api/v1/user/communities
-// @access   Private
+/**
+ * @desc     gets all communties of a logged in user
+ * @route    GET /api/v1/user/communities
+ * @access   Private
+ */
 exports.getUserCommunities = asyncHandler(async (req, res, next) => {
   // find communities of a user
   let communities = await Community.find({
@@ -259,12 +258,14 @@ exports.getUserCommunities = asyncHandler(async (req, res, next) => {
     },
   }).select(["name", "image"]);
 
-  res.status(200).json({ data: communities });
+  res.status(200).json(communities);
 });
 
-// @desc     gets all communties of a logged in user
-// @route    GET /api/v1/user/community/:communityId/join
-// @access   Private
+/**
+ * @desc     gets all communties of a logged in user
+ * @route    GET /api/v1/user/community/:communityId/join
+ * @access   Private 
+ */
 exports.joinCommunity = asyncHandler(async (req, res, next) => {
   //console.log(typeof(req.params.communityId));
 
@@ -295,7 +296,7 @@ exports.joinCommunity = asyncHandler(async (req, res, next) => {
     { new: true, upsert: true }
   );
 
-  console.log(updatedCommunity);
+  //console.log(updatedCommunity);
 
   if (!updatedCommunity) {
     return next(
@@ -305,5 +306,7 @@ exports.joinCommunity = asyncHandler(async (req, res, next) => {
     );
   }
 
-  res.status(200).json({ data: "You are added to the community successfully" });
+  res
+    .status(200)
+    .json({ message: "You are added to the community successfully" });
 });

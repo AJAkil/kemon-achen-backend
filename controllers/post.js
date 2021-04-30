@@ -129,35 +129,30 @@ exports.createComment = asyncHandler(async (req, res, next) => {
   commentResponse[0].createdAt = getTimeDiff(commentResponse[0].createdAt);
 
   //pushing the newly created comment in the post field
-  await Post.findByIdAndUpdate(
+  const updatedPost = await Post.findByIdAndUpdate(
     req.body.parentPost,
-    { $push: { comments: commentResponse[0]._id } },
+    { $inc: { commentCount: 1 } },
     { new: true, upsert: true }
   );
 
-  //console.log(updatedPost);
+  console.log(updatedPost);
 
-  res.status(200).json({ data: commentResponse });
+  res.status(200).json(commentResponse[0]);
 });
 
-
-// @desc     create a reply of a comment by a logged in user
+// @desc     create a reply of a comment by a logged-in user
 // @route    POST /post/:postId/comment/:commentId/reply/create
 // @access   Private
 exports.createReply = asyncHandler(async (req, res, next) => {
-  console.log(req.params.postId)
   req.body.postedBy = mongoose.Types.ObjectId(req.user.id);
   req.body.parentPost = mongoose.Types.ObjectId(req.params.postId);
   req.body.repliedTo = mongoose.Types.ObjectId(req.params.commentId);
-
-  console.log(req.body);
 
   const reply = await Comment.create(req.body);
   //console.log(comment._id);
 
   //Querying the required data
-  const replyResponse = await Comment
-    .find(reply._id)
+  const replyResponse = await Comment.find(reply._id)
     .select(["_id", "content", "asPseudo", "voteCount", "createdAt"])
     .populate({
       path: "postedBy",
@@ -167,14 +162,15 @@ exports.createReply = asyncHandler(async (req, res, next) => {
 
   // editing the createdAt field
   replyResponse[0].createdAt = getTimeDiff(replyResponse[0].createdAt);
-  console.log(replyResponse);
 
-  //pushing the newly created comment in the post field
+  //console.log(replyResponse);
+
+  //pushing the newly created reply in the comment's array of replies
   await Comment.findByIdAndUpdate(
     req.params.commentId,
     { $push: { replies: replyResponse[0]._id } },
     { new: true, upsert: true }
   );
 
-  res.status(200).json({ data: "sex" });
+  res.status(200).json(replyResponse[0]);
 });

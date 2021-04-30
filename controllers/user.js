@@ -185,8 +185,9 @@ exports.getUserPosts = asyncHandler(async (req, res, next) => {
       $in: user._id,
     },
   })
-    .select(["title", "content", "voteCount", "comments", "createdAt"])
-    .populate("community", ["name", "image"]);
+    .select(["title", "content", "voteCount", "commentCount", "createdAt"])
+    .populate("community", ["name", "image"])
+    .lean();
 
   let responseArray = [];
 
@@ -244,7 +245,7 @@ exports.getUserComments = asyncHandler(async (req, res, next) => {
     });
   });
 
-  res.status(200).json({ data: responseArray });
+  res.status(200).json(responseArray);
 });
 
 // @desc     gets all communties of a logged in user

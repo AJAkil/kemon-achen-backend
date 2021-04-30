@@ -3,7 +3,7 @@ exports.sendTokenResponse = (user, statusCode, res, responseObject) => {
   // Create token
   const token = user.getSignedJwtToken();
 
-  responseObject.jwt = token;
+  responseObject.jwt = "Bearer "+token;
 
   res.status(statusCode).json(responseObject);
 };

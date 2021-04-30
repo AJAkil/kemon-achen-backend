@@ -17,12 +17,13 @@ const PostSchema = new mongoose.Schema(
       },
     ],
     voteCount: Number,
-    comments: [
-      {
-        type: mongoose.Schema.ObjectId,
-        ref: "Comment",
-      },
-    ],
+    commentCount: Number,
+    // comments: [
+    //   {
+    //     type: mongoose.Schema.ObjectId,
+    //     ref: "Comment",
+    //   },
+    // ],
     community: {
       type: mongoose.Schema.ObjectId,
       ref: "Community",

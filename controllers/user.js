@@ -231,7 +231,7 @@ exports.getUserComments = asyncHandler(async (req, res, next) => {
       $in: user._id,
     },
   })
-    .select(["content", "createdAt"])
+    .select(["content", "createdAt", "repliedTo"])
     .populate({
       path: "parentPost",
       select: "_id title",

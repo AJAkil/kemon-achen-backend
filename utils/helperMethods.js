@@ -28,7 +28,7 @@ exports.getTimeDiff = (datetime) => {
   let minutes = Math.floor(milisecDiff / 1000 / 60);
   let seconds = Math.floor(milisecDiff / 1000);
 
-  console.log(months, days, hours, minutes, seconds);
+  //console.log(months, days, hours, minutes, seconds);
 
   if (months != 0) return months + " " + "mo";
   else if (days != 0) return days + " " + "d";

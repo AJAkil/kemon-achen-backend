@@ -6,16 +6,23 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "NODE_ENV=production node server",
-    "dev": "nodemon server",
-    "lint": "eslint . --max-warnings=0 --fix",
-    "lint:fix": "eslint --fix ."
+    "dev": "nodemon server"
   },
   "author": "Akil-Fahim-Rishov",
   "license": "ISC",
   "husky": {
     "hooks": {
-      "pre-commit": "yarn lint"
+      "pre-commit": "lint-staged"
     }
+  },
+  "lint-staged": {
+    "*.(js|json|yml)": [
+      "yarn lint",
+      "git add"
+    ],
+    "./**/*.{yml}": [
+      "yarn lint"
+    ]
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

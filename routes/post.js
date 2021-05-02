@@ -16,6 +16,7 @@ router.get("/:postId/like", protect, likePost);
 router.get("/:postId/comment/:commentId/replies", protect, getRepliesOfComment);
 
 router.post('/create', protect, createPost);
+
 router.post('/:postId/comment/create', protect, createComment);
 router.post('/:postId/comment/:commentId/reply/create', protect, createReply);
 

@@ -1,14 +1,14 @@
-const User = require("../models/User");
-const ProfessionalUser = require("../models/ProfessionalUser");
-const RegularUser = require("../models/RegularUser");
-const Disease = require("../models/Disease");
-const Post = require("../models/Post");
-const Comment = require("../models/Comment");
-const Community = require("../models/Community");
-const ErrorResponse = require("../utils/errorResponse");
-const asyncHandler = require("../middleware/async");
-const mongoose = require("mongoose");
-const { getTimeDiff } = require("../utils/helperMethods");
+const User = require('../models/User');
+// const ProfessionalUser = require('../models/ProfessionalUser');
+// const RegularUser = require('../models/RegularUser');
+// const Disease = require('../models/Disease');
+const Post = require('../models/Post');
+const Comment = require('../models/Comment');
+const Community = require('../models/Community');
+// const ErrorResponse = require('../utils/errorResponse');
+const asyncHandler = require('../middleware/async');
+const mongoose = require('mongoose');
+const { getTimeDiff } = require('../utils/helperMethods');
 
 /**
  * @desc     save a post by a logged in user
@@ -16,32 +16,31 @@ const { getTimeDiff } = require("../utils/helperMethods");
  * @access   Private
  */
 exports.savePost = asyncHandler(async (req, res, next) => {
-  let id = mongoose.Types.ObjectId(req.params.postId);
+  const id = mongoose.Types.ObjectId(req.params.postId);
   let message;
-  //console.log(typeof(id));
+  // sconsole.log(typeof(id));
 
   // check to see if the user belongs to the certain community
-  let post = await Post.find({
+  const post = await Post.find({
     _id: id,
   });
 
   console.log(post);
 
-  //console.log(req.user);
-  if (!post) {
+  // console.log(req.user);
+  if (!post)
     return next(
-      new Error(`Post with id: ${req.user._id} is not on the database`, 400)
+      new Error(`Post with id: ${req.user._id} is not on the database`, 400),
     );
-  }
 
-  if (req.query.saveOptions === "save") {
+  if (req.query.saveOptions === 'save') {
     await User.findByIdAndUpdate(req.user.id, { $push: { savedPosts: id } });
 
-    message = "The Post has been saved!";
+    message = 'The Post has been saved!';
   } else {
     await User.findByIdAndUpdate(req.user.id, { $pull: { savedPosts: id } });
 
-    message = "The Post has been unsaved!";
+    message = 'The Post has been unsaved!';
   }
 
   res.status(200).json({ message: message });
@@ -53,35 +52,34 @@ exports.savePost = asyncHandler(async (req, res, next) => {
  * @access   Private
  */
 exports.likePost = asyncHandler(async (req, res, next) => {
-  //console.log(typeof(req.params.communityId));
+  // console.log(typeof(req.params.communityId));
 
-  let id = mongoose.Types.ObjectId(req.params.postId);
+  const id = mongoose.Types.ObjectId(req.params.postId);
 
-  let message = "";
+  let message = '';
   let counter = 1;
 
   // check to see if the user belongs to the certain community
-  if (req.query.likeOptions === "like") {
-    message = "The post has been liked!";
+  if (req.query.likeOptions === 'like') {
+    message = 'The post has been liked!';
   } else {
-    message = "The post has been unliked!";
+    message = 'The post has been unliked!';
     counter = -1;
   }
 
   const post = await Post.findByIdAndUpdate(
     id,
     { $inc: { voteCount: counter } },
-    { new: true, upsert: true }
+    { new: true, upsert: true },
   );
 
-  //console.log(post);
+  // console.log(post);
 
-  //console.log(req.user);
-  if (!post) {
+  // console.log(req.user);
+  if (!post)
     return next(
-      new Error(`Post with id: ${req.user._id} is not on the database`, 400)
+      new Error(`Post with id: ${req.user._id} is not on the database`, 400),
     );
-  }
 
   res.status(200).json({ message: message });
 });
@@ -91,14 +89,14 @@ exports.likePost = asyncHandler(async (req, res, next) => {
  * @route    POST /api/v1/post/create
  * @access   Private
  */
-exports.createPost = asyncHandler(async (req, res, next) => {
+exports.createPost = asyncHandler(async (req, res) => {
   console.log(req.body);
 
   // finding the required community
   const community = await Community.find({
     name: req.body.community.name,
-  }).select(["_id", "tags"]);
-  //console.log(community.tags);
+  }).select(['_id', 'tags']);
+  // console.log(community.tags);
 
   // adding required fields
   req.body.postedBy = mongoose.Types.ObjectId(req.user.id);
@@ -108,7 +106,7 @@ exports.createPost = asyncHandler(async (req, res, next) => {
   const post = await Post.create(req.body);
   console.log(post);
 
-  res.status(200).json({ message: "Your post has been created!" });
+  res.status(200).json({ message: 'Your post has been created!' });
 });
 
 /**
@@ -116,31 +114,31 @@ exports.createPost = asyncHandler(async (req, res, next) => {
  * @route    POST /api/v1/post/:postId/comment/create
  * @access   Private
  */
-exports.createComment = asyncHandler(async (req, res, next) => {
+exports.createComment = asyncHandler(async (req, res) => {
   req.body.postedBy = mongoose.Types.ObjectId(req.user.id);
   req.body.parentPost = mongoose.Types.ObjectId(req.params.postId);
   req.body.repliedTo = null;
 
   const comment = await Comment.create(req.body);
-  //console.log(comment._id);
+  // console.log(comment._id);
 
-  //Querying the required data
+  // Querying the required data
   const commentResponse = await Comment.find(comment._id)
-    .select(["_id", "content", "asPseudo", "voteCount", "createdAt"])
+    .select(['_id', 'content', 'asPseudo', 'voteCount', 'createdAt'])
     .populate({
-      path: "postedBy",
-      select: "_id name image rank",
+      path: 'postedBy',
+      select: '_id name image rank',
     })
     .lean();
 
   // editing the createdAt field
   commentResponse[0].createdAt = getTimeDiff(commentResponse[0].createdAt);
 
-  //pushing the newly created comment in the post field
+  // pushing the newly created comment in the post field
   const updatedPost = await Post.findByIdAndUpdate(
     req.body.parentPost,
     { $inc: { commentCount: 1 } },
-    { new: true, upsert: true }
+    { new: true, upsert: true },
   );
 
   console.log(updatedPost);
@@ -153,33 +151,33 @@ exports.createComment = asyncHandler(async (req, res, next) => {
  * @route    POST /post/:postId/comment/:commentId/reply/create
  * @access   Private
  */
-exports.createReply = asyncHandler(async (req, res, next) => {
+exports.createReply = asyncHandler(async (req, res) => {
   req.body.postedBy = mongoose.Types.ObjectId(req.user.id);
   req.body.parentPost = mongoose.Types.ObjectId(req.params.postId);
   req.body.repliedTo = mongoose.Types.ObjectId(req.params.commentId);
 
   const reply = await Comment.create(req.body);
-  //console.log(comment._id);
+  // console.log(comment._id);
 
-  //Querying the required data
+  // Querying the required data
   const replyResponse = await Comment.find(reply._id)
-    .select(["_id", "content", "asPseudo", "voteCount", "createdAt"])
+    .select(['_id', 'content', 'asPseudo', 'voteCount', 'createdAt'])
     .populate({
-      path: "postedBy",
-      select: "_id name image rank",
+      path: 'postedBy',
+      select: '_id name image rank',
     })
     .lean();
 
   // editing the createdAt field
   replyResponse[0].createdAt = getTimeDiff(replyResponse[0].createdAt);
 
-  //console.log(replyResponse);
+  // console.log(replyResponse);
 
-  //pushing the newly created reply in the comment's array of replies
+  // pushing the newly created reply in the comment's array of replies
   await Comment.findByIdAndUpdate(
     req.params.commentId,
     { $push: { replies: replyResponse[0]._id } },
-    { new: true, upsert: true }
+    { new: true, upsert: true },
   );
 
   res.status(200).json(replyResponse[0]);

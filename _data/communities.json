@@ -1,13 +1,9 @@
 [
-  {
-    "name": "Anxiety",
-    "isPrivate": false,
-    "description": "We care about your Anxiety, let's heal together!",
-    "tags": [
-      "608459ad7b0b8f46785d8c15"
-    ],
-    "users": [
-      "6081e5a547e01753145ed251"
-    ]
-  }
+	{
+		"name": "Anxiety",
+		"isPrivate": false,
+		"description": "We care about your Anxiety, let's heal together!",
+		"tags": ["608459ad7b0b8f46785d8c15"],
+		"users": ["6081e5a547e01753145ed251"]
+	}
 ]

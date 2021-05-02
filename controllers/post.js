@@ -184,3 +184,31 @@ exports.createReply = asyncHandler(async (req, res, next) => {
 
   res.status(200).json(replyResponse[0]);
 });
+
+/**
+ * @desc     get all the replies of a comment
+ * @route    GET /post/:postId/comment/:commentId/replies
+ * @access   Private
+ */
+ exports.getRepliesOfComment = asyncHandler(async (req, res, next) => {
+
+  const commentId = mongoose.Types.ObjectId(req.params.commentId);
+
+  //Querying the required data
+  const replies = await Comment.find({repliedTo: commentId})
+    .select(["_id", "content", "asPseudo", "voteCount", "createdAt"])
+    .populate({
+      path: "postedBy",
+      select: "_id name image rank",
+    })
+    .lean();
+
+  //console.log(replies)
+
+  // editing the createdAt field
+  replies.forEach((reply) => {
+    reply.createdAt = getTimeDiff(reply.createdAt);
+  });
+
+  res.status(200).json(replies);
+});

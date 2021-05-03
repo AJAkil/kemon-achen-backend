@@ -147,7 +147,7 @@ exports.login = asyncHandler(async (req, res, next) => {
     _id: user.id,
     role: user.role,
     image: user.image,
-    name: 'no name',
+    name: user.name,
   };
 
   sendTokenResponse(user, 200, res, responseObject);

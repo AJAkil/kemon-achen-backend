@@ -16,11 +16,8 @@ exports.getTimeDiff = datetime => {
   // console.log(givenTime + " " + now);
   let milisecDiff = -1;
 
-  if (datetime < now)
-    milisecDiff = now - givenTime;
-  else
-    milisecDiff = givenTime - now;
-
+  if (datetime < now) milisecDiff = now - givenTime;
+  else milisecDiff = givenTime - now;
 
   const months = Math.floor(milisecDiff / 1000 / 60 / (60 * 24) / 30);
   const days = Math.floor(milisecDiff / 1000 / 60 / (60 * 24));
@@ -39,8 +36,7 @@ exports.getTimeDiff = datetime => {
 
 exports.removeItemOnce = (arr, value) => {
   const index = arr.indexOf(value);
-  if (index > -1)
-    arr.splice(index, 1);
+  if (index > -1) arr.splice(index, 1);
 
   return arr;
 };
@@ -48,11 +44,24 @@ exports.removeItemOnce = (arr, value) => {
 exports.removeItemAll = (arr, value) => {
   let i = 0;
   while (i < arr.length) {
-    if (arr[i] === value)
-      arr.splice(i, 1);
-    else
-      ++i;
-
+    if (arr[i] === value) arr.splice(i, 1);
+    else ++i;
   }
   return arr;
+};
+
+exports.getQueryOption = req => {
+  const queryDict = {
+    votes: { voteCount: -1 },
+    old: { createdAt: 1 },
+    new: { createdAt: -1 },
+    default: { createdAt: -1 },
+    professional: { createdAt: -1 }
+  };
+
+  if (Object.keys(req.query).length === 0) {
+    return queryDict.default;
+  } else {
+    return queryDict[req.query.commentsSortedBy];
+  }
 };

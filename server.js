@@ -36,7 +36,7 @@ app.use('/api/v1/user', user);
 app.use('/api/v1/post', post);
 
 // Custom Error Handler
-app.use(errorHandler);
+//app.use(errorHandler);
 
 const PORT = process.env.PORT || 9000;
 const server = app.listen(

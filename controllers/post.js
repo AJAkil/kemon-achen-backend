@@ -1,14 +1,14 @@
 const User = require('../models/User');
 // const ProfessionalUser = require('../models/ProfessionalUser');
 // const RegularUser = require('../models/RegularUser');
-// const Disease = require('../models/Disease');
+const Disease = require('../models/Disease');
 const Post = require('../models/Post');
 const Comment = require('../models/Comment');
 const Community = require('../models/Community');
 // const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const mongoose = require('mongoose');
-const { getTimeDiff } = require('../utils/helperMethods');
+const { getTimeDiff, getQueryOption } = require('../utils/helperMethods');
 
 /**
  * @desc     save a post by a logged in user
@@ -118,6 +118,7 @@ exports.createComment = asyncHandler(async (req, res) => {
   req.body.postedBy = mongoose.Types.ObjectId(req.user.id);
   req.body.parentPost = mongoose.Types.ObjectId(req.params.postId);
   req.body.repliedTo = null;
+  req.body.voteCount = 0;
 
   const comment = await Comment.create(req.body);
   // console.log(comment._id);
@@ -141,7 +142,7 @@ exports.createComment = asyncHandler(async (req, res) => {
     { new: true, upsert: true },
   );
 
-  console.log(updatedPost);
+  //console.log(updatedPost);
 
   res.status(200).json(commentResponse[0]);
 });
@@ -188,25 +189,207 @@ exports.createReply = asyncHandler(async (req, res) => {
  * @route    GET /post/:postId/comment/:commentId/replies
  * @access   Private
  */
- exports.getRepliesOfComment = asyncHandler(async (req, res, next) => {
-
+exports.getRepliesOfComment = asyncHandler(async (req, res, next) => {
   const commentId = mongoose.Types.ObjectId(req.params.commentId);
 
   //Querying the required data
-  const replies = await Comment.find({repliedTo: commentId})
-    .select(["_id", "content", "asPseudo", "voteCount", "createdAt"])
+  const replies = await Comment.find({ repliedTo: commentId })
+    .select(['_id', 'content', 'asPseudo', 'voteCount', 'createdAt'])
     .populate({
-      path: "postedBy",
-      select: "_id name image rank",
+      path: 'postedBy',
+      select: '_id name image rank',
     })
     .lean();
 
   //console.log(replies)
 
   // editing the createdAt field
-  replies.forEach((reply) => {
+  replies.forEach(reply => {
     reply.createdAt = getTimeDiff(reply.createdAt);
   });
 
   res.status(200).json(replies);
+});
+
+/**
+ * @desc     get all post information given the post id
+ * @route    GET /post/:postId
+ * @access   Private
+ */
+exports.getPostById = asyncHandler(async (req, res, next) => {
+  const postId = mongoose.Types.ObjectId(req.params.postId);
+  const queryField = getQueryOption(req);
+
+  const populationQuery = [
+    {
+      path: 'postedBy',
+      select: '_id name image rank',
+    },
+    {
+      path: 'community',
+      select: '_id name',
+    },
+  ];
+
+  const post = await Post.find(postId)
+    .select([
+      '_id',
+      'title',
+      'content',
+      'asPseudo',
+      'voteCount',
+      'commentCount',
+      'tags',
+      'createdAt',
+    ])
+    .populate(populationQuery)
+    .lean();
+
+  // fixing the disease field
+  const tagInfo = await Disease.find({
+    _id: { $in: post[0].tags },
+  }).select(['title']);
+
+  for (let i = 0; i < tagInfo.length; i++) {
+    post[0].tags[i] = tagInfo[i].title;
+  }
+
+  //editing the createdAt field
+
+  post[0].createdAt = getTimeDiff(post[0].createdAt);
+  delete post[0].postedBy.usertype;
+
+  // query for comments
+  const comments = await Comment.find({
+    parentPost: post[0]._id,
+    repliedTo: null,
+  })
+    .select(['_id', 'content', 'asPseudo', 'voteCount', 'replies', 'createdAt'])
+    .populate({
+      path: 'postedBy',
+      select: '_id name image rank role',
+    })
+    .sort(queryField)
+    .lean();
+
+  //console.log(comments);
+
+  // editing the comment's field
+  comments.forEach(comment => {
+    comment.createdAt = getTimeDiff(comment.createdAt);
+    comment.replyCount = comment.replies.length;
+    delete comment.replies;
+    delete comment.postedBy.usertype;
+  });
+
+  // seprating the professional and regular user
+  let sortedComments = comments;
+
+  // if we have to sort profession
+  if (req.query.commentsSortedBy === 'professional') {
+    let professionalComments = comments.filter(
+      comment => comment.postedBy.role === 'professional',
+    );
+    let regularComments = comments.filter(
+      comment => comment.postedBy.role === 'regular',
+    );
+
+    sortedComments = professionalComments.concat(regularComments);
+    sortedComments.forEach(comment => delete comment.postedBy.role);
+  }
+
+  post[0].comments = sortedComments;
+  res.status(200).json(post[0]);
+});
+
+
+/**
+ * @desc     get feed of a user
+ * @route    GET /post/feed
+ * @access   Private
+ */
+ exports.getFeed = asyncHandler(async (req, res, next) => {
+  const postId = mongoose.Types.ObjectId(req.params.postId);
+  const queryField = getQueryOption(req);
+
+  const populationQuery = [
+    {
+      path: 'postedBy',
+      select: '_id name image rank',
+    },
+    {
+      path: 'community',
+      select: '_id name',
+    },
+  ];
+
+  const post = await Post.find(postId)
+    .select([
+      '_id',
+      'title',
+      'content',
+      'asPseudo',
+      'voteCount',
+      'commentCount',
+      'tags',
+      'createdAt',
+    ])
+    .populate(populationQuery)
+    .lean();
+
+  // fixing the disease field
+  const tagInfo = await Disease.find({
+    _id: { $in: post[0].tags },
+  }).select(['title']);
+
+  for (let i = 0; i < tagInfo.length; i++) {
+    post[0].tags[i] = tagInfo[i].title;
+  }
+
+  //editing the createdAt field
+
+  post[0].createdAt = getTimeDiff(post[0].createdAt);
+  delete post[0].postedBy.usertype;
+
+  // query for comments
+  const comments = await Comment.find({
+    parentPost: post[0]._id,
+    repliedTo: null,
+  })
+    .select(['_id', 'content', 'asPseudo', 'voteCount', 'replies', 'createdAt'])
+    .populate({
+      path: 'postedBy',
+      select: '_id name image rank role',
+    })
+    .sort(queryField)
+    .lean();
+
+  //console.log(comments);
+
+  // editing the comment's field
+  comments.forEach(comment => {
+    comment.createdAt = getTimeDiff(comment.createdAt);
+    comment.replyCount = comment.replies.length;
+    delete comment.replies;
+    delete comment.postedBy.usertype;
+  });
+
+  // seprating the professional and regular user
+  let sortedComments = comments;
+
+  // if we have to sort profession
+  if (req.query.commentsSortedBy === 'professional') {
+    let professionalComments = comments.filter(
+      comment => comment.postedBy.role === 'professional',
+    );
+    let regularComments = comments.filter(
+      comment => comment.postedBy.role === 'regular',
+    );
+
+    sortedComments = professionalComments.concat(regularComments);
+    sortedComments.forEach(comment => delete comment.postedBy.role);
+  }
+
+  post[0].comments = sortedComments;
+  res.status(200).json(post[0]);
 });

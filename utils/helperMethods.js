@@ -27,11 +27,11 @@ exports.getTimeDiff = datetime => {
 
   //console.log(months, days, hours, minutes, seconds);
 
-  if (months != 0) return months + ' ' + 'mo';
-  else if (days != 0) return days + ' ' + 'd';
-  else if (hours != 0) return hours + ' ' + 'h';
-  else if (minutes != 0) return minutes + ' ' + 'm';
-  else return seconds + ' ' + 's';
+  if (months != 0) return months + 'mo';
+  else if (days != 0) return days  + 'd';
+  else if (hours != 0) return hours  + 'h';
+  else if (minutes != 0) return minutes  + 'm';
+  else return seconds + 's';
 };
 
 exports.removeItemOnce = (arr, value) => {
@@ -59,9 +59,22 @@ exports.getQueryOption = req => {
     professional: { createdAt: -1 }
   };
 
+  //console.log(Object.keys(req.query)[0]);
+
   if (Object.keys(req.query).length === 0) {
     return queryDict.default;
   } else {
-    return queryDict[req.query.commentsSortedBy];
+    return queryDict[req.query[Object.keys(req.query)[0]]];
   }
 };
+
+exports.sortByProfessional = (array) => {
+  let professionalData = array.filter(
+    obj => obj.postedBy.role === 'professional',
+  );
+  let regularUserData = array.filter(
+    obj => obj.postedBy.role === 'regular',
+  );
+
+  return professionalData.concat(regularUserData);
+}

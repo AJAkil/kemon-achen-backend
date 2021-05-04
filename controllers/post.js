@@ -5,10 +5,14 @@ const Disease = require('../models/Disease');
 const Post = require('../models/Post');
 const Comment = require('../models/Comment');
 const Community = require('../models/Community');
-// const ErrorResponse = require('../utils/errorResponse');
+const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const mongoose = require('mongoose');
-const { getTimeDiff, getQueryOption } = require('../utils/helperMethods');
+const {
+  getTimeDiff,
+  getQueryOption,
+  sortByProfessional,
+} = require('../utils/helperMethods');
 
 /**
  * @desc     save a post by a logged in user
@@ -30,7 +34,7 @@ exports.savePost = asyncHandler(async (req, res, next) => {
   // console.log(req.user);
   if (!post)
     return next(
-      new Error(`Post with id: ${req.user._id} is not on the database`, 400),
+      new Error(`Post with id: ${req.user._id} does not exist`, 400),
     );
 
   if (req.query.saveOptions === 'save') {
@@ -78,7 +82,7 @@ exports.likePost = asyncHandler(async (req, res, next) => {
   // console.log(req.user);
   if (!post)
     return next(
-      new Error(`Post with id: ${req.user._id} is not on the database`, 400),
+      new Error(`Post with id: ${req.user._id} does not exist`, 400),
     );
 
   res.status(200).json({ message: message });
@@ -101,7 +105,9 @@ exports.createPost = asyncHandler(async (req, res) => {
   // adding required fields
   req.body.postedBy = mongoose.Types.ObjectId(req.user.id);
   req.body.community = mongoose.Types.ObjectId(community[0]._id);
-  req.body.tags = [community[0].tags[0]]; // setting the tag to the tag of the community
+  req.body.tags = [community[0].tags[0]]; // setting the tag to the tag of the community for now
+  req.body.voteCount = 0;
+  req.body.commentCount = 0;
 
   const post = await Post.create(req.body);
   console.log(post);
@@ -114,11 +120,23 @@ exports.createPost = asyncHandler(async (req, res) => {
  * @route    POST /api/v1/post/:postId/comment/create
  * @access   Private
  */
-exports.createComment = asyncHandler(async (req, res) => {
+exports.createComment = asyncHandler(async (req, res, next) => {
+
   req.body.postedBy = mongoose.Types.ObjectId(req.user.id);
   req.body.parentPost = mongoose.Types.ObjectId(req.params.postId);
   req.body.repliedTo = null;
   req.body.voteCount = 0;
+
+
+  const postChecker = await Post.findById(req.body.parentPost);
+  if (!postChecker) {
+    return next(
+      new ErrorResponse(
+        `Post With id ${req.params.postId} does not exist`,
+        404,
+      ),
+    );
+  }
 
   const comment = await Comment.create(req.body);
   // console.log(comment._id);
@@ -134,9 +152,10 @@ exports.createComment = asyncHandler(async (req, res) => {
 
   // editing the createdAt field
   commentResponse[0].createdAt = getTimeDiff(commentResponse[0].createdAt);
+  delete commentResponse[0].postedBy.usertype;
 
   // pushing the newly created comment in the post field
-  const updatedPost = await Post.findByIdAndUpdate(
+  await Post.findByIdAndUpdate(
     req.body.parentPost,
     { $inc: { commentCount: 1 } },
     { new: true, upsert: true },
@@ -152,10 +171,30 @@ exports.createComment = asyncHandler(async (req, res) => {
  * @route    POST /post/:postId/comment/:commentId/reply/create
  * @access   Private
  */
-exports.createReply = asyncHandler(async (req, res) => {
+exports.createReply = asyncHandler(async (req, res, next) => {
   req.body.postedBy = mongoose.Types.ObjectId(req.user.id);
   req.body.parentPost = mongoose.Types.ObjectId(req.params.postId);
   req.body.repliedTo = mongoose.Types.ObjectId(req.params.commentId);
+
+  const postChecker = await Post.findById(req.body.parentPost);
+  if (!postChecker) {
+    return next(
+      new ErrorResponse(
+        `Post With id ${req.params.postId} does not exist`,
+        404,
+      ),
+    );
+  }
+
+  const commentChecker = await Comment.findById(req.body.repliedTo);
+  if (!commentChecker) {
+    return next(
+      new ErrorResponse(
+        `Comment With id ${req.params.commentId} does not exist`,
+        404,
+      ),
+    );
+  }
 
   const reply = await Comment.create(req.body);
   // console.log(comment._id);
@@ -171,6 +210,7 @@ exports.createReply = asyncHandler(async (req, res) => {
 
   // editing the createdAt field
   replyResponse[0].createdAt = getTimeDiff(replyResponse[0].createdAt);
+  delete replyResponse[0].postedBy.usertype;
 
   // console.log(replyResponse);
 
@@ -192,6 +232,28 @@ exports.createReply = asyncHandler(async (req, res) => {
 exports.getRepliesOfComment = asyncHandler(async (req, res, next) => {
   const commentId = mongoose.Types.ObjectId(req.params.commentId);
 
+
+  const postChecker = await Post.findById(req.params.postId);
+  if (!postChecker) {
+    return next(
+      new ErrorResponse(
+        `Post With id ${req.params.postId} does not exist`,
+        404,
+      ),
+    );
+  }
+
+  const commentChecker = await Comment.findById(commentId);
+  if (!commentChecker) {
+    return next(
+      new ErrorResponse(
+        `Comment With id ${req.params.commentId} does not exist`,
+        404,
+      ),
+    );
+  }
+
+
   //Querying the required data
   const replies = await Comment.find({ repliedTo: commentId })
     .select(['_id', 'content', 'asPseudo', 'voteCount', 'createdAt'])
@@ -206,6 +268,7 @@ exports.getRepliesOfComment = asyncHandler(async (req, res, next) => {
   // editing the createdAt field
   replies.forEach(reply => {
     reply.createdAt = getTimeDiff(reply.createdAt);
+    delete reply.postedBy.usertype;
   });
 
   res.status(200).json(replies);
@@ -231,6 +294,16 @@ exports.getPostById = asyncHandler(async (req, res, next) => {
     },
   ];
 
+  const postChecker = await Post.findById(postId);
+  if (!postChecker) {
+    return next(
+      new ErrorResponse(
+        `Post With id ${req.params.postId} does not exist`,
+        404,
+      ),
+    );
+  }
+
   const post = await Post.find(postId)
     .select([
       '_id',
@@ -244,6 +317,7 @@ exports.getPostById = asyncHandler(async (req, res, next) => {
     ])
     .populate(populationQuery)
     .lean();
+  
 
   // fixing the disease field
   const tagInfo = await Disease.find({
@@ -285,37 +359,32 @@ exports.getPostById = asyncHandler(async (req, res, next) => {
   // seprating the professional and regular user
   let sortedComments = comments;
 
-  // if we have to sort profession
+  // if we have to sort by professional user
   if (req.query.commentsSortedBy === 'professional') {
-    let professionalComments = comments.filter(
-      comment => comment.postedBy.role === 'professional',
-    );
-    let regularComments = comments.filter(
-      comment => comment.postedBy.role === 'regular',
-    );
-
-    sortedComments = professionalComments.concat(regularComments);
-    sortedComments.forEach(comment => delete comment.postedBy.role);
+    sortedComments = sortByProfessional(comments);
   }
 
+  sortedComments.forEach(comment => delete comment.postedBy.role);
   post[0].comments = sortedComments;
   res.status(200).json(post[0]);
 });
-
 
 /**
  * @desc     get feed of a user
  * @route    GET /post/feed
  * @access   Private
  */
- exports.getFeed = asyncHandler(async (req, res, next) => {
-  const postId = mongoose.Types.ObjectId(req.params.postId);
+exports.getFeed = asyncHandler(async (req, res, next) => {
   const queryField = getQueryOption(req);
+
+  // search for user community first
+  const user = await User.findById(req.user._id).select(['communities']);
+  const userCommunities = user.communities;
 
   const populationQuery = [
     {
       path: 'postedBy',
-      select: '_id name image rank',
+      select: '_id name image rank role',
     },
     {
       path: 'community',
@@ -323,7 +392,7 @@ exports.getPostById = asyncHandler(async (req, res, next) => {
     },
   ];
 
-  const post = await Post.find(postId)
+  const posts = await Post.find({ community: { $in: userCommunities } })
     .select([
       '_id',
       'title',
@@ -331,65 +400,27 @@ exports.getPostById = asyncHandler(async (req, res, next) => {
       'asPseudo',
       'voteCount',
       'commentCount',
-      'tags',
       'createdAt',
     ])
     .populate(populationQuery)
-    .lean();
-
-  // fixing the disease field
-  const tagInfo = await Disease.find({
-    _id: { $in: post[0].tags },
-  }).select(['title']);
-
-  for (let i = 0; i < tagInfo.length; i++) {
-    post[0].tags[i] = tagInfo[i].title;
-  }
-
-  //editing the createdAt field
-
-  post[0].createdAt = getTimeDiff(post[0].createdAt);
-  delete post[0].postedBy.usertype;
-
-  // query for comments
-  const comments = await Comment.find({
-    parentPost: post[0]._id,
-    repliedTo: null,
-  })
-    .select(['_id', 'content', 'asPseudo', 'voteCount', 'replies', 'createdAt'])
-    .populate({
-      path: 'postedBy',
-      select: '_id name image rank role',
-    })
     .sort(queryField)
     .lean();
 
-  //console.log(comments);
-
-  // editing the comment's field
-  comments.forEach(comment => {
-    comment.createdAt = getTimeDiff(comment.createdAt);
-    comment.replyCount = comment.replies.length;
-    delete comment.replies;
-    delete comment.postedBy.usertype;
+  // editing the createdAt field
+  posts.forEach(post => {
+    post.createdAt = getTimeDiff(post.createdAt);
+    delete post.postedBy.usertype;
   });
+  console.log(posts);
 
   // seprating the professional and regular user
-  let sortedComments = comments;
+  let sortedPosts = posts;
 
   // if we have to sort profession
-  if (req.query.commentsSortedBy === 'professional') {
-    let professionalComments = comments.filter(
-      comment => comment.postedBy.role === 'professional',
-    );
-    let regularComments = comments.filter(
-      comment => comment.postedBy.role === 'regular',
-    );
-
-    sortedComments = professionalComments.concat(regularComments);
-    sortedComments.forEach(comment => delete comment.postedBy.role);
+  if (req.query.feedSortedBy === 'professional') {
+    sortedPosts = sortByProfessional(posts);
   }
 
-  post[0].comments = sortedComments;
-  res.status(200).json(post[0]);
+  sortedPosts.forEach(post => delete post.postedBy.role);
+  res.status(200).json(sortedPosts);
 });

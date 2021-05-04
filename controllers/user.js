@@ -175,11 +175,10 @@ exports.getMe = asyncHandler(async (req, res) => {
 exports.getUserPosts = asyncHandler(async (req, res, next) => {
   // find user first
   const user = await User.findById(req.params.userid);
-
   // check to see if user exists on the database
   if (!user)
     return next(
-      new ErrorResponse(`User not found with the id ${req.params.id}`, 404),
+      new ErrorResponse(`User not found with the id ${req.params.userid}`, 404),
     );
 
   // find posts in Post collection

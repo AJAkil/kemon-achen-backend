@@ -1,6 +1,6 @@
 //const ErrorResponse = require('../utils/errorResponse');
 
-const errorHandler = (err, req, res) => {
+const errorHandler = (err, req, res, next) => {
   const error = { ...err };
   // const statusCode = 500;
   // const message = '';
@@ -8,7 +8,7 @@ const errorHandler = (err, req, res) => {
   error.message = err.message;
 
   // Log to console for dev
-  // console.log('pera?',err);
+  //console.log('pera?',err);
 
   // Mongoose bad objectId
   if (err.name === 'CastError') {

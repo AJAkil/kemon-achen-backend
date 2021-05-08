@@ -16,7 +16,7 @@ const { sendTokenResponse, getTimeDiff } = require('../utils/helperMethods');
  * @access   Public
  */
 exports.signupRegularUser = asyncHandler(async (req, res, next) => {
-  const { role, email, password } = req.body;
+  const { role, email, name, password } = req.body;
 
   // Check if an user with the same email exist in the database
   const user = await User.findOne({ email: email });
@@ -35,6 +35,7 @@ exports.signupRegularUser = asyncHandler(async (req, res, next) => {
   // Create Regular User
   const regularUser = await RegularUser.create({
     email,
+    name,
     password,
     role,
   });
@@ -42,6 +43,7 @@ exports.signupRegularUser = asyncHandler(async (req, res, next) => {
   const responseObject = {
     _id: regularUser.id,
     role: regularUser.role,
+    name: regularUser.name,
     image: regularUser.image,
     message:
       "Welcome to Kemon Achen! Let's take a step towards healing together <3",
@@ -59,6 +61,7 @@ exports.signupProfessionalUser = asyncHandler(async (req, res, next) => {
   const {
     role,
     email,
+    name,
     password,
     verified,
     license,
@@ -97,6 +100,7 @@ exports.signupProfessionalUser = asyncHandler(async (req, res, next) => {
   // Create Regular User
   const professionalUser = await ProfessionalUser.create({
     email,
+    name,
     password,
     role,
     verified,
@@ -108,6 +112,7 @@ exports.signupProfessionalUser = asyncHandler(async (req, res, next) => {
   const responseObject = {
     _id: professionalUser.id,
     role: professionalUser.role,
+    name: professionalUser.name,
     image: professionalUser.image,
     message: 'You are awaiting verification',
   };
@@ -221,7 +226,8 @@ exports.getUserComments = asyncHandler(async (req, res, next) => {
     postedBy: {
       $in: user._id,
     },
-  }).select(["content", "createdAt", "repliedTo"])
+  })
+    .select(['content', 'createdAt', 'repliedTo'])
     .populate({
       path: 'parentPost',
       select: '_id title',

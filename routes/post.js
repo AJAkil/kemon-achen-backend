@@ -7,7 +7,7 @@ const {
   createReply,
   getRepliesOfComment,
   getPostById,
-  getFeed
+  getFeed,
 } = require('../controllers/post');
 
 const router = express.Router();
@@ -18,7 +18,6 @@ router.get('/:postId/like', protect, likePost);
 router.get('/:postId/comment/:commentId/replies', protect, getRepliesOfComment);
 router.get('/feed', protect, getFeed);
 router.get('/:postId', protect, getPostById);
-
 
 router.post('/create', protect, createPost);
 router.post('/:postId/comment/create', protect, createComment);

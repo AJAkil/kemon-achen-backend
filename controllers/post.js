@@ -33,9 +33,7 @@ exports.savePost = asyncHandler(async (req, res, next) => {
 
   // console.log(req.user);
   if (!post)
-    return next(
-      new Error(`Post with id: ${req.user._id} does not exist`, 400),
-    );
+    return next(new Error(`Post with id: ${req.user._id} does not exist`, 400));
 
   if (req.query.saveOptions === 'save') {
     await User.findByIdAndUpdate(req.user.id, { $push: { savedPosts: id } });
@@ -56,34 +54,46 @@ exports.savePost = asyncHandler(async (req, res, next) => {
  * @access   Private
  */
 exports.likePost = asyncHandler(async (req, res, next) => {
-  // console.log(typeof(req.params.communityId));
-
   const id = mongoose.Types.ObjectId(req.params.postId);
+
+  const userId = mongoose.Types.ObjectId(req.user.id);
 
   let message = '';
   let counter = 1;
+  let isLiked = false;
 
-  // check to see if the user belongs to the certain community
+  let post = null;
   if (req.query.likeOptions === 'like') {
     message = 'The post has been liked!';
+    isLiked = true;
+    post = await Post.findByIdAndUpdate(
+      id,
+      {
+        $set: { isLikedByCurrentUser: isLiked },
+        $push: { likedByUsers: userId },
+        $inc: { voteCount: counter },
+      },
+      { new: true, upsert: true },
+    );
   } else {
     message = 'The post has been unliked!';
     counter = -1;
+    isLiked = false;
+    post = await Post.findByIdAndUpdate(
+      id,
+      {
+        $set: { isLikedByCurrentUser: isLiked },
+        $pull: { likedByUsers: userId },
+        $inc: { voteCount: counter },
+      },
+      { new: true, upsert: true },
+    );
   }
 
-  const post = await Post.findByIdAndUpdate(
-    id,
-    { $inc: { voteCount: counter } },
-    { new: true, upsert: true },
-  );
+  console.log(post);
 
-  // console.log(post);
-
-  // console.log(req.user);
   if (!post)
-    return next(
-      new Error(`Post with id: ${req.user._id} does not exist`, 400),
-    );
+    return next(new Error(`Post with id: ${req.user._id} does not exist`, 400));
 
   res.status(200).json({ message: message });
 });
@@ -121,12 +131,10 @@ exports.createPost = asyncHandler(async (req, res) => {
  * @access   Private
  */
 exports.createComment = asyncHandler(async (req, res, next) => {
-
   req.body.postedBy = mongoose.Types.ObjectId(req.user.id);
   req.body.parentPost = mongoose.Types.ObjectId(req.params.postId);
   req.body.repliedTo = null;
   req.body.voteCount = 0;
-
 
   const postChecker = await Post.findById(req.body.parentPost);
   if (!postChecker) {
@@ -232,7 +240,6 @@ exports.createReply = asyncHandler(async (req, res, next) => {
 exports.getRepliesOfComment = asyncHandler(async (req, res, next) => {
   const commentId = mongoose.Types.ObjectId(req.params.commentId);
 
-
   const postChecker = await Post.findById(req.params.postId);
   if (!postChecker) {
     return next(
@@ -252,7 +259,6 @@ exports.getRepliesOfComment = asyncHandler(async (req, res, next) => {
       ),
     );
   }
-
 
   //Querying the required data
   const replies = await Comment.find({ repliedTo: commentId })
@@ -317,7 +323,6 @@ exports.getPostById = asyncHandler(async (req, res, next) => {
     ])
     .populate(populationQuery)
     .lean();
-  
 
   // fixing the disease field
   const tagInfo = await Disease.find({
@@ -374,7 +379,7 @@ exports.getPostById = asyncHandler(async (req, res, next) => {
  * @route    GET /post/feed
  * @access   Private
  */
-exports.getFeed = asyncHandler(async (req, res, next) => {
+exports.getFeed = asyncHandler(async (req, res) => {
   const queryField = getQueryOption(req);
 
   // search for user community first

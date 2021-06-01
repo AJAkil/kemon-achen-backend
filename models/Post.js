@@ -4,14 +4,15 @@ const PostSchema = new mongoose.Schema(
   {
     title: String,
     content: String,
-    isLikedByCurrentUser: {
-      type: Boolean,
-      default: false,
-    },
+    // isLikedByCurrentUser: {
+    //   type: Boolean,
+    //   default: false,
+    // },
     likedByUsers: [
       {
         type: mongoose.Schema.ObjectId,
         ref: 'User',
+        //default: [],
       },
     ],
     postedBy: {

@@ -12,6 +12,7 @@ const {
   getTimeDiff,
   getQueryOption,
   sortByProfessional,
+  presentinTheArray,
 } = require('../utils/helperMethods');
 
 /**
@@ -60,16 +61,16 @@ exports.likePost = asyncHandler(async (req, res, next) => {
 
   let message = '';
   let counter = 1;
-  let isLiked = false;
+  //let isLiked = false;
 
   let post = null;
   if (req.query.likeOptions === 'like') {
     message = 'The post has been liked!';
-    isLiked = true;
+    //isLiked = true;
     post = await Post.findByIdAndUpdate(
       id,
       {
-        $set: { isLikedByCurrentUser: isLiked },
+        //$set: { isLikedByCurrentUser: isLiked },
         $push: { likedByUsers: userId },
         $inc: { voteCount: counter },
       },
@@ -78,11 +79,11 @@ exports.likePost = asyncHandler(async (req, res, next) => {
   } else {
     message = 'The post has been unliked!';
     counter = -1;
-    isLiked = false;
+    //isLiked = false;
     post = await Post.findByIdAndUpdate(
       id,
       {
-        $set: { isLikedByCurrentUser: isLiked },
+        //$set: { isLikedByCurrentUser: isLiked },
         $pull: { likedByUsers: userId },
         $inc: { voteCount: counter },
       },
@@ -118,6 +119,7 @@ exports.createPost = asyncHandler(async (req, res) => {
   req.body.tags = [community[0].tags[0]]; // setting the tag to the tag of the community for now
   req.body.voteCount = 0;
   req.body.commentCount = 0;
+  req.body.likedByUsers = [];
 
   const post = await Post.create(req.body);
   console.log(post);
@@ -406,17 +408,26 @@ exports.getFeed = asyncHandler(async (req, res) => {
       'voteCount',
       'commentCount',
       'createdAt',
+      'likedByUsers',
     ])
     .populate(populationQuery)
     .sort(queryField)
     .lean();
 
   // editing the createdAt field
+
   posts.forEach(post => {
     post.createdAt = getTimeDiff(post.createdAt);
+    post.isLikedByCurrentUser = presentinTheArray(
+      post.likedByUsers,
+      req.user._id,
+    );
+
     delete post.postedBy.usertype;
+    delete post.likedByUsers;
   });
   console.log(posts);
+  //console.log('feeed uswer id ', req.user._id);
 
   // seprating the professional and regular user
   let sortedPosts = posts;

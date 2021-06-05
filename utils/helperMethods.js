@@ -28,9 +28,9 @@ exports.getTimeDiff = datetime => {
   //console.log(months, days, hours, minutes, seconds);
 
   if (months != 0) return months + 'mo';
-  else if (days != 0) return days  + 'd';
-  else if (hours != 0) return hours  + 'h';
-  else if (minutes != 0) return minutes  + 'm';
+  else if (days != 0) return days + 'd';
+  else if (hours != 0) return hours + 'h';
+  else if (minutes != 0) return minutes + 'm';
   else return seconds + 's';
 };
 
@@ -56,7 +56,7 @@ exports.getQueryOption = req => {
     old: { createdAt: 1 },
     new: { createdAt: -1 },
     default: { createdAt: -1 },
-    professional: { createdAt: -1 }
+    professional: { createdAt: -1 },
   };
 
   //console.log(Object.keys(req.query)[0]);
@@ -68,13 +68,21 @@ exports.getQueryOption = req => {
   }
 };
 
-exports.sortByProfessional = (array) => {
+exports.presentinTheArray = (array, value) => {
+  let isPresent = false;
+  for (let i = 0; i < array.length; i++) {
+    if (JSON.stringify(array[i]) === JSON.stringify(value)) {
+      isPresent = true;
+      break;
+    }
+  }
+  return isPresent;
+};
+exports.sortByProfessional = array => {
   let professionalData = array.filter(
     obj => obj.postedBy.role === 'professional',
   );
-  let regularUserData = array.filter(
-    obj => obj.postedBy.role === 'regular',
-  );
+  let regularUserData = array.filter(obj => obj.postedBy.role === 'regular');
 
   return professionalData.concat(regularUserData);
-}
+};

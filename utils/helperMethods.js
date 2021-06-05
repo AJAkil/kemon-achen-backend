@@ -71,7 +71,6 @@ exports.getQueryOption = req => {
 exports.presentinTheArray = (array, value) => {
   let isPresent = false;
   for (let i = 0; i < array.length; i++) {
-    console.log(array[i], '   val   ', value);
     if (JSON.stringify(array[i]) === JSON.stringify(value)) {
       isPresent = true;
       break;

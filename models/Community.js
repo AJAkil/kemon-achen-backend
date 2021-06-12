@@ -20,6 +20,15 @@ const CommunitySchema = new mongoose.Schema({
       ref: 'User',
     },
   ],
+  about: {
+    detailsDescription: String,
+    links: [
+      {
+        link: String,
+        title: String,
+      },
+    ],
+  },
 });
 
 module.exports = mongoose.model('Community', CommunitySchema);

@@ -21,7 +21,7 @@ const CommunitySchema = new mongoose.Schema({
     },
   ],
   about: {
-    detailsDescription: String,
+    detailedDescription: String,
     links: [
       {
         link: String,

@@ -9,22 +9,31 @@ const RegularUserSchema = new mongoose.Schema({
       ref: 'Disease',
     },
   ],
+  isDoneNotifying: Boolean, // for concluding pop-ups/push noti(related to activity) if user presses yes
   testInfo: [
     {
-      test: {
-        type: mongoose.Schema.ObjectId,
-        ref: 'Test',
-      },
-      score: Number,
-    },
-  ],
-  history: [
-    {
-      disease: {
-        type: mongoose.Schema.ObjectId,
-        ref: 'Disease',
-      },
-      startDate: Date,
+      type: new mongoose.Schema(
+        {
+          test: {
+            type: mongoose.Schema.ObjectId,
+            ref: 'Test',
+          },
+          anxietyScore: Number,
+          stressScore: Number,
+          depressionScore: Number,
+          status: {
+            type: String,
+            enum: ['excellent', 'good', 'bad', 'concerning'],
+          },
+          advice: [
+            {
+              type: mongoose.Schema.ObjectId,
+              ref: 'Advice',
+            },
+          ],
+        },
+        { timestamps: true },
+      ),
     },
   ],
 });

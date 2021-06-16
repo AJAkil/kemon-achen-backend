@@ -22,6 +22,14 @@ const CommunitySchema = new mongoose.Schema({
   ],
   about: {
     detailedDescription: String,
+    symptoms: [{ type: String }],
+    toDo: [{ type: String }],
+    images: [
+      {
+        type: String,
+        default: 'no-photo.jpg',
+      },
+    ],
     links: [
       {
         link: String,

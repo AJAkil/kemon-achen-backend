@@ -9,7 +9,7 @@ const RegularUserSchema = new mongoose.Schema({
       ref: 'Disease',
     },
   ],
-  isDoneNotifying: Boolean, // for concluding pop-ups if user presses yes
+  isDoneNotifying: Boolean, // for concluding pop-ups/push noti(related to activity) if user presses yes
   testInfo: [
     {
       type: new mongoose.Schema(

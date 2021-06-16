@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const TestSchema = new mongoose.Schema(
   {
     name: String,
+    timesTaken: Number,
     anxietyQuestions: [
       {
         question: String,

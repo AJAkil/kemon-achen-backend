@@ -8,7 +8,11 @@ const Community = require('../models/Community');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const mongoose = require('mongoose');
-const { sendTokenResponse, getTimeDiff } = require('../utils/helperMethods');
+const {
+  sendTokenResponse,
+  getTimeDiff,
+  presentinTheArray,
+} = require('../utils/helperMethods');
 
 /**
  * @desc     Signup Regular User
@@ -258,7 +262,7 @@ exports.getUserCommunities = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc     gets all communties of a logged in user
+ * @desc     Joins a user to a community
  * @route    GET /api/v1/user/community/:communityId/join
  * @access   Private
  */
@@ -301,7 +305,90 @@ exports.joinCommunity = asyncHandler(async (req, res, next) => {
     );
   }
 
+  // Now update the user to include the community
+  const updatedUser = await User.findByIdAndUpdate(
+    req.user._id,
+    { $push: { communities: id } },
+    { new: true, upsert: true },
+  );
+
+  if (!updatedUser) {
+    return next(
+      new ErrorResponse(
+        `Failed to update User with id: ${req.user._id} with Community Id: ${id}`,
+      ),
+    );
+  }
+
   res
     .status(200)
     .json({ message: 'You are added to the community successfully' });
+});
+
+/**
+ * @desc     gets all saved posts of a logged in user
+ * @route    GET /api/v1/user/savedPosts
+ * @access   Private
+ */
+exports.getSavedPosts = asyncHandler(async (req, res, next) => {
+  // get the saved posts of an user
+  const savedPosts = await User.findById(req.user._id)
+    .populate({
+      path: 'savedPosts',
+      select: '_id',
+    })
+    .select(['_id'])
+    .lean();
+
+  // Now filter the ids from the savedPosts object
+  let postIds = savedPosts.savedPosts;
+  postIds = postIds.map(post => {
+    return mongoose.Types.ObjectId(post._id);
+  });
+
+  //console.log(postIds);
+
+  // Perform query upon the post collection to get details about the posts
+  const populationQuery = [
+    {
+      path: 'postedBy',
+      select: '_id name image rank role',
+    },
+    {
+      path: 'community',
+      select: '_id name',
+    },
+  ];
+
+  const posts = await Post.find({ _id: { $in: postIds } })
+    .select([
+      '_id',
+      'title',
+      'content',
+      'asPseudo',
+      'voteCount',
+      'commentCount',
+      'createdAt',
+      'likedByUsers',
+    ])
+    .populate(populationQuery)
+    .lean();
+
+  // editing the createdAt field
+
+  posts.forEach(post => {
+    post.createdAt = getTimeDiff(post.createdAt);
+    post.isLikedByCurrentUser = presentinTheArray(
+      post.likedByUsers,
+      req.user._id,
+    );
+
+    delete post.postedBy.usertype;
+    delete post.likedByUsers;
+  });
+  // console.log(posts);
+
+  //console.log(savedPosts);
+
+  res.status(200).json(posts);
 });

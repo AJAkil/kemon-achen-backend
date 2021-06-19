@@ -23,8 +23,8 @@ const ProfessionalUserSchema = new mongoose.Schema({
 });
 
 const ProfessionalUser = User.discriminator(
-    'ProfessionalUser',
-    ProfessionalUserSchema
+  'ProfessionalUser',
+  ProfessionalUserSchema,
 );
 
 module.exports = ProfessionalUser;

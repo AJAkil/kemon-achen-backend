@@ -9,6 +9,8 @@ const {
   getUserCommunities,
   joinCommunity,
   getSavedPosts,
+  getProfessionalInformation,
+  getProfessionalChamberInformation,
 } = require('../controllers/user');
 
 const router = express.Router();
@@ -23,5 +25,11 @@ router.get('/:userid/comments', protect, getUserComments);
 router.get('/communities', protect, getUserCommunities);
 router.get('/community/:communityId/join', protect, joinCommunity);
 router.get('/savedPosts', protect, getSavedPosts);
+router.get('/professional/:userid/info', protect, getProfessionalInformation);
+router.get(
+  '/professional/:userid/chamber',
+  protect,
+  getProfessionalChamberInformation,
+);
 
 module.exports = router;

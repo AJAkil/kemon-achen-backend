@@ -392,3 +392,56 @@ exports.getSavedPosts = asyncHandler(async (req, res, next) => {
 
   res.status(200).json(posts);
 });
+
+/**
+ * @desc     gets all saved posts of a logged in user
+ * @route    GET /api/v1/user/professional/:userid/info
+ * @access   Private
+ */
+exports.getProfessionalInformation = asyncHandler(async (req, res, next) => {
+  const userId = mongoose.Types.ObjectId(req.params.userid);
+  const professionalInfo = await User.findById(userId)
+    .populate({
+      path: 'specialization',
+      select: 'title',
+    })
+    .select(['_id', 'name', 'rank', 'image'])
+    .lean();
+
+  professionalInfo.specialization = professionalInfo.specialization.map(
+    s => s.title,
+  );
+  delete professionalInfo.usertype;
+
+  res.status(200).json(professionalInfo);
+});
+
+/**
+ * @desc     gets all saved posts of a logged in user
+ * @route    GET /api/v1/user/professional/:userid/chamber
+ * @access   Private
+ */
+exports.getProfessionalChamberInformation = asyncHandler(
+  async (req, res, next) => {
+    const userId = mongoose.Types.ObjectId(req.params.userid);
+    const professionalChamberInfo = await User.findById(userId)
+      .select([
+        '_id',
+        'phone',
+        'email',
+        'qualification',
+        'license',
+        'licenseIssued',
+        'about',
+        'address',
+      ])
+      .lean();
+
+    // professionalInfo.specialization = professionalInfo.specialization.map(
+    //   s => s.title,
+    // );
+    delete professionalChamberInfo.usertype;
+
+    res.status(200).json(professionalChamberInfo);
+  },
+);

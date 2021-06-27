@@ -14,6 +14,7 @@ connectDB();
 // Route files
 const user = require('./routes/user');
 const post = require('./routes/post');
+const test = require('./routes/test');
 const community = require('./routes/community');
 
 const app = express();
@@ -35,6 +36,7 @@ if (process.env.NODE_ENV === 'development') {
 // // Mount the routers
 app.use('/api/v1/user', user);
 app.use('/api/v1/post', post);
+app.use('/api/v1/test', test);
 app.use('/api/v1/community', community);
 
 // Custom Error Handler

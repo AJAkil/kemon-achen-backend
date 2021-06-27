@@ -1,11 +1,6 @@
-const User = require('../models/User');
-const ProfessionalUser = require('../models/ProfessionalUser');
-const RegularUser = require('../models/RegularUser');
 const Disease = require('../models/Disease');
 const Post = require('../models/Post');
-const Comment = require('../models/Comment');
 const Community = require('../models/Community');
-const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const mongoose = require('mongoose');
 const {
@@ -20,7 +15,7 @@ const {
  * @route    GET /api/v1/community/:communityId/information
  * @access   Private
  */
-exports.getCommunityInformation = asyncHandler(async (req, res, next) => {
+exports.getCommunityInformation = asyncHandler(async (req, res) => {
   const communityId = mongoose.Types.ObjectId(req.params.communityId);
   let communityInfo = await Community.findById(communityId)
     .select(['_id', 'image', 'tags', 'users', 'name', 'description'])
@@ -49,7 +44,7 @@ exports.getCommunityInformation = asyncHandler(async (req, res, next) => {
  * @route    GET /api/v1/community/:communityId/feed
  * @access   Private
  */
-exports.getCommunityFeed = asyncHandler(async (req, res, next) => {
+exports.getCommunityFeed = asyncHandler(async (req, res) => {
   const communityId = mongoose.Types.ObjectId(req.params.communityId);
   const queryField = getQueryOption(req);
 
@@ -107,7 +102,7 @@ exports.getCommunityFeed = asyncHandler(async (req, res, next) => {
  * @route    GET /api/v1/community/:communityId/information
  * @access   Private
  */
-exports.getCommunityInformation = asyncHandler(async (req, res, next) => {
+exports.getCommunityInformation = asyncHandler(async (req, res) => {
   const communityId = mongoose.Types.ObjectId(req.params.communityId);
   let communityInfo = await Community.findById(communityId)
     .select(['_id', 'image', 'tags', 'users', 'name', 'description'])
@@ -136,7 +131,7 @@ exports.getCommunityInformation = asyncHandler(async (req, res, next) => {
  * @route    POST /api/v1/community/:communityId/updateAbout
  * @access   Private
  */
-exports.updateAbout = asyncHandler(async (req, res, next) => {
+exports.updateAbout = asyncHandler(async (req, res) => {
   const communityId = mongoose.Types.ObjectId(req.params.communityId);
 
   console.log(req.body);
@@ -145,7 +140,7 @@ exports.updateAbout = asyncHandler(async (req, res, next) => {
     about: req.body,
   });
 
-  res.status(200).json('communityInfo');
+  res.status(200).json(communityInfo);
 });
 
 /**
@@ -153,7 +148,7 @@ exports.updateAbout = asyncHandler(async (req, res, next) => {
  * @route    GET /api/v1/community/:communityId/about
  * @access   Private
  */
-exports.getCommunityAbout = asyncHandler(async (req, res, next) => {
+exports.getCommunityAbout = asyncHandler(async (req, res) => {
   const communityId = mongoose.Types.ObjectId(req.params.communityId);
 
   let communityInfo = await Community.findByIdAndUpdate(communityId).select([

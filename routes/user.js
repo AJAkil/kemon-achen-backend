@@ -3,7 +3,6 @@ const {
   signupRegularUser,
   signupProfessionalUser,
   login,
-  getMe,
   getUserPosts,
   getUserComments,
   getUserCommunities,

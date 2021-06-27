@@ -124,7 +124,7 @@ exports.createPost = asyncHandler(async (req, res) => {
   const post = await Post.create(req.body);
   console.log(post);
 
-  res.status(200).json({ message: 'Your post has been created!' });
+  res.status(200).json(post); //changed to return the created post
 });
 
 /**

@@ -6,17 +6,17 @@ const TestSchema = new mongoose.Schema(
     timesTaken: Number,
     anxietyQuestions: [
       {
-        question: String,
+        type: String,
       },
     ],
     stressQuestions: [
       {
-        question: String,
+        type: String,
       },
     ],
     depressionQuestions: [
       {
-        question: String,
+        type: String,
       },
     ],
   },

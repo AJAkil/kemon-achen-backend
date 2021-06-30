@@ -74,7 +74,7 @@ exports.submitTest = asyncHandler(async (req, res) => {
 
   //console.log(typeof anxietyScore);
 
-  const anxietyAdvice = await Advice.find({
+  const anxietyAdvice = await Advice.findOne({
     test: { _id: req.params.testId },
     disease: 'anxiety',
     $and: [
@@ -83,7 +83,7 @@ exports.submitTest = asyncHandler(async (req, res) => {
     ],
   }).select(['messages', 'advice']);
 
-  const depressionAdvice = await Advice.find({
+  const depressionAdvice = await Advice.findOne({
     test: { _id: req.params.testId },
     disease: 'depression',
     $and: [
@@ -92,7 +92,7 @@ exports.submitTest = asyncHandler(async (req, res) => {
     ],
   }).select(['messages', 'advice']);
 
-  const stressAdvice = await Advice.find({
+  const stressAdvice = await Advice.findOne({
     test: { _id: req.params.testId },
     disease: 'stress',
     $and: [

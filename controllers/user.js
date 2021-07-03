@@ -196,7 +196,7 @@ exports.getUserPosts = asyncHandler(async (req, res, next) => {
       $in: user._id,
     },
   })
-    .select(['title', 'content', 'voteCount', 'commentCount', 'createdAt'])
+    .select(['title', 'content', 'voteCount', 'commentCount', 'createdAt', 'likedByUsers'])
     .populate('community', ['name', 'image'])
     .lean();
 
@@ -204,6 +204,12 @@ exports.getUserPosts = asyncHandler(async (req, res, next) => {
 
   posts.forEach(post => {
     post.createdAt = getTimeDiff(post.createdAt);
+    post.isLikedByCurrentUser = presentinTheArray(
+      post.likedByUsers,
+      req.user._id,
+    );
+
+    delete post.likedByUsers;
   });
   // console.log(createdAt);
 

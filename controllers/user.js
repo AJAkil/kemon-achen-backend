@@ -3,6 +3,7 @@ const ProfessionalUser = require('../models/ProfessionalUser');
 const RegularUser = require('../models/RegularUser');
 const Disease = require('../models/Disease');
 const Post = require('../models/Post');
+const Test = require('../models/Test');
 const Comment = require('../models/Comment');
 const Community = require('../models/Community');
 const ErrorResponse = require('../utils/errorResponse');
@@ -196,7 +197,14 @@ exports.getUserPosts = asyncHandler(async (req, res, next) => {
       $in: user._id,
     },
   })
-    .select(['title', 'content', 'voteCount', 'commentCount', 'createdAt', 'likedByUsers'])
+    .select([
+      'title',
+      'content',
+      'voteCount',
+      'commentCount',
+      'createdAt',
+      'likedByUsers',
+    ])
     .populate('community', ['name', 'image'])
     .lean();
 
@@ -448,4 +456,52 @@ exports.getProfessionalChamberInformation = asyncHandler(async (req, res) => {
   delete professionalChamberInfo.usertype;
 
   res.status(200).json(professionalChamberInfo);
+});
+
+/**
+ * @desc     gets tests history of an user
+ * @route    GET /api/v1/user/tests/history
+ * @access   Private
+ */
+exports.getUserTestHistory = asyncHandler(async (req, res) => {
+  const userId = mongoose.Types.ObjectId(req.user._id);
+
+  let testInfoArray = await User.find(userId).select(['testInfo']);
+  testInfoArray = testInfoArray[0].testInfo;
+
+  //console.log('test : ', testInfoArray);
+
+  let responseObject = [];
+
+  let testIdsArray = [];
+  testInfoArray.map(element => {
+    testIdsArray.push(element.test);
+  });
+
+  //console.log('test id : ', testIdsArray[0]);
+
+  let testNames = await Test.find({
+    _id: { $in: testIdsArray },
+  }).select('name');
+
+  //console.log('test name : ', testNames);
+
+  for (let i = 0; i < testInfoArray.length; i++) {
+    let scoresArray = [];
+    scoresArray.push(testInfoArray[i].anxietyScore);
+    scoresArray.push(testInfoArray[i].depressionScore);
+    scoresArray.push(testInfoArray[i].stressScore);
+
+    let obj = {
+      testname: testNames[i].name,
+      status: testInfoArray[i].status,
+      scoreArray: scoresArray,
+      createdAt: testInfoArray[i].createdAt,
+    };
+
+    responseObject.push(obj);
+  }
+  console.log(responseObject);
+
+  res.status(200).json(responseObject);
 });

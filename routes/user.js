@@ -8,6 +8,7 @@ const {
   getUserCommunities,
   joinCommunity,
   getSavedPosts,
+  getUserTestHistory,
   getProfessionalInformation,
   getProfessionalChamberInformation,
 } = require('../controllers/user');
@@ -21,6 +22,7 @@ router.post('/login', login);
 
 router.get('/:userid/posts', protect, getUserPosts);
 router.get('/:userid/comments', protect, getUserComments);
+router.get('/tests/history', protect, getUserTestHistory);
 router.get('/communities', protect, getUserCommunities);
 router.get('/community/:communityId/join', protect, joinCommunity);
 router.get('/savedPosts', protect, getSavedPosts);

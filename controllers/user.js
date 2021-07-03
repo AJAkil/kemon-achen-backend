@@ -427,27 +427,25 @@ exports.getProfessionalInformation = asyncHandler(async (req, res) => {
  * @route    GET /api/v1/user/professional/:userid/chamber
  * @access   Private
  */
-exports.getProfessionalChamberInformation = asyncHandler(
-  async (req, res) => {
-    const userId = mongoose.Types.ObjectId(req.params.userid);
-    const professionalChamberInfo = await User.findById(userId)
-      .select([
-        '_id',
-        'phone',
-        'email',
-        'qualification',
-        'license',
-        'licenseIssued',
-        'about',
-        'address',
-      ])
-      .lean();
+exports.getProfessionalChamberInformation = asyncHandler(async (req, res) => {
+  const userId = mongoose.Types.ObjectId(req.params.userid);
+  const professionalChamberInfo = await User.findById(userId)
+    .select([
+      '_id',
+      'phone',
+      'email',
+      'qualification',
+      'license',
+      'licenseIssued',
+      'about',
+      'address',
+    ])
+    .lean();
 
-    // professionalInfo.specialization = professionalInfo.specialization.map(
-    //   s => s.title,
-    // );
-    delete professionalChamberInfo.usertype;
+  // professionalInfo.specialization = professionalInfo.specialization.map(
+  //   s => s.title,
+  // );
+  delete professionalChamberInfo.usertype;
 
-    res.status(200).json(professionalChamberInfo);
-  },
-);
+  res.status(200).json(professionalChamberInfo);
+});

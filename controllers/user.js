@@ -196,7 +196,7 @@ exports.getUserPosts = asyncHandler(async (req, res, next) => {
       $in: user._id,
     },
   })
-    .select(['title', 'content', 'voteCount', 'commentCount', 'createdAt'])
+    .select(['title', 'content', 'voteCount', 'commentCount', 'createdAt', 'likedByUsers'])
     .populate('community', ['name', 'image'])
     .lean();
 
@@ -204,6 +204,12 @@ exports.getUserPosts = asyncHandler(async (req, res, next) => {
 
   posts.forEach(post => {
     post.createdAt = getTimeDiff(post.createdAt);
+    post.isLikedByCurrentUser = presentinTheArray(
+      post.likedByUsers,
+      req.user._id,
+    );
+
+    delete post.likedByUsers;
   });
   // console.log(createdAt);
 
@@ -330,7 +336,7 @@ exports.joinCommunity = asyncHandler(async (req, res, next) => {
  * @route    GET /api/v1/user/savedPosts
  * @access   Private
  */
-exports.getSavedPosts = asyncHandler(async (req, res, next) => {
+exports.getSavedPosts = asyncHandler(async (req, res) => {
   // get the saved posts of an user
   const savedPosts = await User.findById(req.user._id)
     .populate({
@@ -398,7 +404,7 @@ exports.getSavedPosts = asyncHandler(async (req, res, next) => {
  * @route    GET /api/v1/user/professional/:userid/info
  * @access   Private
  */
-exports.getProfessionalInformation = asyncHandler(async (req, res, next) => {
+exports.getProfessionalInformation = asyncHandler(async (req, res) => {
   const userId = mongoose.Types.ObjectId(req.params.userid);
   const professionalInfo = await User.findById(userId)
     .populate({
@@ -422,7 +428,7 @@ exports.getProfessionalInformation = asyncHandler(async (req, res, next) => {
  * @access   Private
  */
 exports.getProfessionalChamberInformation = asyncHandler(
-  async (req, res, next) => {
+  async (req, res) => {
     const userId = mongoose.Types.ObjectId(req.params.userid);
     const professionalChamberInfo = await User.findById(userId)
       .select([

@@ -72,7 +72,6 @@ exports.submitTest = asyncHandler(async (req, res) => {
   const depressionScore = parseInt(req.body.depression);
   const stressScore = parseInt(req.body.stress);
 
-
   const anxietyAdvice = await Advice.find({
     test: { _id: req.params.testId },
     disease: 'anxiety',
@@ -80,7 +79,7 @@ exports.submitTest = asyncHandler(async (req, res) => {
       { 'range.max': { $gt: anxietyScore } },
       { 'range.min': { $lt: anxietyScore } },
     ],
-  }).select(['_id','messages', 'advice']);
+  }).select(['_id', 'messages', 'advice']);
 
   const depressionAdvice = await Advice.find({
     test: { _id: req.params.testId },
@@ -102,68 +101,71 @@ exports.submitTest = asyncHandler(async (req, res) => {
 
   const responseObject = {
     _id: req.params.testId,
-    anxietyAdvice: anxietyAdvice,
-    depressionAdvice: depressionAdvice,
-    stressAdvice: stressAdvice,
+    anxietyAdvice: anxietyAdvice[0],
+    depressionAdvice: depressionAdvice[0],
+    stressAdvice: stressAdvice[0],
   };
 
   // add latest advices to user's array
 
   // calculate status based on score range
   let anxietyStatus, stressStatus, depressionStatus, status;
-  
+
   // anxietyStatus
-  if( anxietyScore >= 0 && anxietyScore <= 7){
+  if (anxietyScore >= 0 && anxietyScore <= 7) {
     anxietyStatus = 1;
-  }else if( anxietyScore >= 8 && anxietyScore <= 14 ){
+  } else if (anxietyScore >= 8 && anxietyScore <= 14) {
     anxietyStatus = 2;
-  }else if(anxietyScore >= 15 && anxietyScore <= 20){
+  } else if (anxietyScore >= 15 && anxietyScore <= 20) {
     anxietyStatus = 3;
   }
 
-  if( depressionScore >= 0 && depressionScore <= 7){
+  if (depressionScore >= 0 && depressionScore <= 7) {
     depressionStatus = 1;
-  }else if( depressionScore >= 8 && depressionScore <= 14 ){
+  } else if (depressionScore >= 8 && depressionScore <= 14) {
     depressionStatus = 2;
-  }else if(depressionScore >= 15 && depressionScore <= 20){
+  } else if (depressionScore >= 15 && depressionScore <= 20) {
     depressionStatus = 3;
   }
 
-  if( stressScore >= 0 && stressScore <= 7){
+  if (stressScore >= 0 && stressScore <= 7) {
     stressStatus = 1;
-  }else if( stressScore >= 8 && stressScore <= 14 ){
+  } else if (stressScore >= 8 && stressScore <= 14) {
     stressStatus = 2;
-  }else if(stressScore >= 15 && stressScore <= 20){
+  } else if (stressScore >= 15 && stressScore <= 20) {
     stressStatus = 3;
   }
 
   const sum = anxietyStatus + depressionStatus + stressStatus;
 
-  if(sum === 3){
+  if (sum === 3) {
     status = 'excellent';
-  }else if(sum === 4 || sum === 5 ){
+  } else if (sum === 4 || sum === 5) {
     status = 'good';
-  }else if(sum === 6 || sum === 7){
+  } else if (sum === 6 || sum === 7) {
     status = 'bad';
-  }else if(sum === 8 || sum == 9){
-    status = 'concerning'; 
+  } else if (sum === 8 || sum == 9) {
+    status = 'concerning';
   }
-
 
   // construct the object and then push
   const testInfo = {
-      test: req.params.testId,
-      anxietyScore: anxietyScore,
-      stressScore: stressScore,
-      depressionScore: depressionScore,
-      status: status,
-      advice: [anxietyAdvice[0]._id, depressionAdvice[0]._id, stressAdvice[0]._id]
-  }
+    test: req.params.testId,
+    anxietyScore: anxietyScore,
+    stressScore: stressScore,
+    depressionScore: depressionScore,
+    status: status,
+    advice: [
+      anxietyAdvice[0]._id,
+      depressionAdvice[0]._id,
+      stressAdvice[0]._id,
+    ],
+  };
 
   const user = await User.findOne(req.user._id);
   user.testInfo.unshift(testInfo);
 
-  await user.save()
+  await user.save();
 
   res.status(200).json(responseObject);
 });

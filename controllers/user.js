@@ -482,9 +482,17 @@ exports.getUserTestHistory = asyncHandler(async (req, res) => {
 
   let testNames = await Test.find({
     _id: { $in: testIdsArray },
-  }).select('name');
+  }).select('name').lean();
 
   //console.log('test name : ', testNames);
+
+  // Making an object from array
+  const testIdtoName = {}
+  testNames.map(test => {
+    testIdtoName[test._id] = test.name
+  })
+
+  //console.log(testIdtoName);
 
   for (let i = 0; i < testInfoArray.length; i++) {
     let scoresArray = [];
@@ -493,7 +501,7 @@ exports.getUserTestHistory = asyncHandler(async (req, res) => {
     scoresArray.push(testInfoArray[i].stressScore);
 
     let obj = {
-      testname: testNames[i].name,
+      testname: testIdtoName[testInfoArray[i].test],
       status: testInfoArray[i].status,
       scoreArray: scoresArray,
       createdAt: testInfoArray[i].createdAt,
@@ -501,7 +509,7 @@ exports.getUserTestHistory = asyncHandler(async (req, res) => {
 
     responseObject.push(obj);
   }
-  console.log(responseObject);
+  //console.log(responseObject);
 
   res.status(200).json(responseObject);
 });

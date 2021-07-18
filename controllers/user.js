@@ -13,6 +13,7 @@ const {
   sendTokenResponse,
   getTimeDiff,
   presentinTheArray,
+  getQueryOption,
 } = require('../utils/helperMethods');
 
 /**
@@ -482,15 +483,17 @@ exports.getUserTestHistory = asyncHandler(async (req, res) => {
 
   let testNames = await Test.find({
     _id: { $in: testIdsArray },
-  }).select('name').lean();
+  })
+    .select('name')
+    .lean();
 
   //console.log('test name : ', testNames);
 
   // Making an object from array
-  const testIdtoName = {}
+  const testIdtoName = {};
   testNames.map(test => {
-    testIdtoName[test._id] = test.name
-  })
+    testIdtoName[test._id] = test.name;
+  });
 
   //console.log(testIdtoName);
 
@@ -512,4 +515,51 @@ exports.getUserTestHistory = asyncHandler(async (req, res) => {
   //console.log(responseObject);
 
   res.status(200).json(responseObject);
+});
+
+/**
+ * @desc     gets suggested professionaal for a logged in user
+ * @route    GET /api/v1/user/suggesetedProfessionals
+ * @access   Private
+ */
+exports.getSuggestedProfessionals = asyncHandler(async (req, res) => {
+  const userId = mongoose.Types.ObjectId(req.user._id);
+
+  const queryField = getQueryOption(req);
+
+  //get all the professionals sorted by(rank) from the community that a user belongs to
+
+  // find communities of a user
+  let communities = await Community.find({
+    users: {
+      $in: req.user._id,
+    },
+  })
+    .select(['_id'])
+    .lean();
+
+  communities = communities.map(community => {
+    return community._id;
+  });
+
+  let suggestedProfessionals = await User.find({
+    communities: {
+      $in: communities,
+    },
+    role: 'professional',
+  })
+    .select(['name', 'rank', 'image', 'specialization', 'address'])
+    .populate('specialization', ['title'])
+    .sort(queryField)
+    .lean();
+
+  for (let i = 0; i < suggestedProfessionals.length; i++) {
+    suggestedProfessionals[i].specializations =
+      suggestedProfessionals[i].specialization;
+
+    delete suggestedProfessionals[i].specialization;
+    delete suggestedProfessionals[i].usertype;
+  }
+
+  res.status(200).json(suggestedProfessionals);
 });

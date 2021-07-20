@@ -53,6 +53,11 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: 'no-photo.jpg',
     },
+    pushNotificationTokens: [
+      {
+        type: String,
+      },
+    ],
     resetPasswordToken: String,
     resetPasswordExpire: Date,
     communities: [

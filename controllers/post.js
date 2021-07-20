@@ -30,7 +30,7 @@ exports.savePost = asyncHandler(async (req, res, next) => {
     _id: id,
   });
 
-  console.log(post);
+  //console.log(post);
 
   // console.log(req.user);
   if (!post)
@@ -91,7 +91,7 @@ exports.likePost = asyncHandler(async (req, res, next) => {
     );
   }
 
-  console.log(post);
+  //console.log(post);
 
   if (!post)
     return next(new Error(`Post with id: ${req.user._id} does not exist`, 400));
@@ -105,7 +105,7 @@ exports.likePost = asyncHandler(async (req, res, next) => {
  * @access   Private
  */
 exports.createPost = asyncHandler(async (req, res) => {
-  console.log(req.body);
+  //console.log(req.body);
 
   // finding the required community
   const community = await Community.find({
@@ -122,7 +122,7 @@ exports.createPost = asyncHandler(async (req, res) => {
   req.body.likedByUsers = [];
 
   const post = await Post.create(req.body);
-  console.log(post);
+  //console.log(post);
 
   res.status(200).json(post); //changed to return the created post
 });
@@ -426,7 +426,7 @@ exports.getFeed = asyncHandler(async (req, res) => {
     delete post.postedBy.usertype;
     delete post.likedByUsers;
   });
-  console.log(posts);
+  //console.log(posts);
   //console.log('feeed uswer id ', req.user._id);
 
   // seprating the professional and regular user

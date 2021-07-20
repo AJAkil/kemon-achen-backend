@@ -14,6 +14,7 @@ const {
   getTimeDiff,
   presentinTheArray,
 } = require('../utils/helperMethods');
+const Advice = require('../models/Advice');
 
 /**
  * @desc     Signup Regular User
@@ -164,6 +165,42 @@ exports.login = asyncHandler(async (req, res, next) => {
 });
 
 /**
+ * @desc     logs out an user
+ * @route    POST /api/v1/user/logout
+ * @access   Private
+ */
+exports.logOut = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+  user.pushNotificationTokens = [];
+  await user.save();
+
+  res.status(200).json({ message: 'Logout successful' });
+});
+
+/**
+ * @desc     register a push token for an user
+ * @route    POST /api/v1/user/pushToken/register
+ * @access   Private
+ */
+exports.registerPushNotificationToken = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+  //console.log(JSON.stringify(user));
+  const token = req.body.pushToken;
+
+  if (!user.pushNotificationTokens.some(tok => tok === token))
+    user.pushNotificationTokens.push(token);
+
+  //console.log(user);
+
+  await user.save();
+
+  // const responseObject = {
+  //   pushToken: user.id,
+  // };
+  res.status(200).json({ pushToken: token });
+});
+
+/**
  * @desc     gets an user
  * @route    GET /api/v1/auth/me
  * @access   Private
@@ -294,7 +331,7 @@ exports.joinCommunity = asyncHandler(async (req, res, next) => {
     },
   });
 
-  console.log(community);
+  //console.log(community);
   if (community.length !== 0)
     return next(
       new Error(
@@ -482,15 +519,17 @@ exports.getUserTestHistory = asyncHandler(async (req, res) => {
 
   let testNames = await Test.find({
     _id: { $in: testIdsArray },
-  }).select('name').lean();
+  })
+    .select('name')
+    .lean();
 
   //console.log('test name : ', testNames);
 
   // Making an object from array
-  const testIdtoName = {}
+  const testIdtoName = {};
   testNames.map(test => {
-    testIdtoName[test._id] = test.name
-  })
+    testIdtoName[test._id] = test.name;
+  });
 
   //console.log(testIdtoName);
 
@@ -510,6 +549,35 @@ exports.getUserTestHistory = asyncHandler(async (req, res) => {
     responseObject.push(obj);
   }
   //console.log(responseObject);
+
+  res.status(200).json(responseObject);
+});
+
+/**
+ * @desc     gets latest advices for an user
+ * @route    GET /api/v1/user/advice/latest
+ * @access   Private
+ */
+exports.getLatestAdvices = asyncHandler(async (req, res) => {
+  const userId = mongoose.Types.ObjectId(req.user._id);
+
+  const userInfo = await User.find({ _id: userId }).select('testInfo');
+
+  const adviceIds = userInfo[0].testInfo[0].advice;
+
+  //console.log(adviceIds);
+
+  let advices = await Advice.find({
+    _id: { $in: adviceIds },
+  });
+
+  //console.log(advices);
+
+  const responseObject = {
+    anxietyAdvice: advices[0],
+    depressionAdvice: advices[1],
+    stressAdvice: advices[2],
+  };
 
   res.status(200).json(responseObject);
 });

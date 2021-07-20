@@ -16,10 +16,12 @@
     "bcryptjs": "^2.4.3",
     "colors": "^1.4.0",
     "dotenv": "^8.2.0",
+    "expo-server-sdk": "^3.6.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.12.3",
     "morgan": "^1.10.0",
+    "node-cron": "^3.0.0",
     "nodemon": "^2.0.7",
     "yarn": "^1.22.10"
   },

@@ -11,11 +11,11 @@ const ErrorResponse = require('../utils/errorResponse');
  * @access   Admin privilege
  */
 exports.createTest = asyncHandler(async (req, res) => {
-  console.log(req.body);
+  //console.log(req.body);
 
   req.body.timesTaken = 0;
   const test = await Test.create(req.body);
-  console.log(test);
+  //console.log(test);
 
   res.status(200).json(test);
 });
@@ -26,10 +26,10 @@ exports.createTest = asyncHandler(async (req, res) => {
  * @access   Admin privilege
  */
 exports.createAdvice = asyncHandler(async (req, res) => {
-  console.log(req.body);
+  //console.log(req.body);
   req.body.test = mongoose.Types.ObjectId(req.body.testId);
   const advice = await Advice.create(req.body);
-  console.log(advice);
+  //console.log(advice);
 
   res.status(200).json(advice);
 });
@@ -67,7 +67,7 @@ exports.getTestById = asyncHandler(async (req, res, next) => {
  * @access   Private
  */
 exports.submitTest = asyncHandler(async (req, res) => {
-  console.log('user id', req.user);
+  //console.log('user id', req.user);
   const anxietyScore = parseInt(req.body.anxiety);
   const depressionScore = parseInt(req.body.depression);
   const stressScore = parseInt(req.body.stress);
@@ -163,6 +163,7 @@ exports.submitTest = asyncHandler(async (req, res) => {
   };
 
   const user = await User.findOne(req.user._id);
+  user.isDoneNotifying = false;
   user.testInfo.unshift(testInfo);
 
   await user.save();

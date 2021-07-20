@@ -82,7 +82,7 @@ exports.getCommunityFeed = asyncHandler(async (req, res) => {
     delete post.postedBy.usertype;
     delete post.likedByUsers;
   });
-  console.log(posts);
+  //console.log(posts);
   //console.log('feeed uswer id ', req.user._id);
 
   // seprating the professional and regular user

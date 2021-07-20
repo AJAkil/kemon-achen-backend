@@ -3,6 +3,7 @@ const {
   signupRegularUser,
   signupProfessionalUser,
   login,
+  registerPushNotificationToken,
   getUserPosts,
   getUserComments,
   getUserCommunities,
@@ -11,6 +12,8 @@ const {
   getUserTestHistory,
   getProfessionalInformation,
   getProfessionalChamberInformation,
+  getLatestAdvices,
+  logOut,
 } = require('../controllers/user');
 
 const router = express.Router();
@@ -19,8 +22,11 @@ const { protect } = require('../middleware/auth');
 router.post('/regular/signup', signupRegularUser);
 router.post('/professional/signup', signupProfessionalUser);
 router.post('/login', login);
+router.post('/logout', protect, logOut);
+router.post('/pushToken/register', protect, registerPushNotificationToken);
 
 router.get('/:userid/posts', protect, getUserPosts);
+router.get('/advice/latest', protect, getLatestAdvices);
 router.get('/:userid/comments', protect, getUserComments);
 router.get('/tests/history', protect, getUserTestHistory);
 router.get('/communities', protect, getUserCommunities);

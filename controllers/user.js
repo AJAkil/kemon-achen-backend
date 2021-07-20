@@ -21,7 +21,7 @@ const {
  * @access   Public
  */
 exports.signupRegularUser = asyncHandler(async (req, res, next) => {
-  const { role, email, name, password } = req.body;
+  const { email, name, password, image, pseudonym } = req.body;
 
   // Check if an user with the same email exist in the database
   const user = await User.findOne({ email: email });
@@ -29,29 +29,30 @@ exports.signupRegularUser = asyncHandler(async (req, res, next) => {
   if (user)
     return next(new ErrorResponse('This email is already registered', 400));
 
-  if (role !== 'regular')
-    return next(
-      new ErrorResponse(
-        'Wrong role in request body. Role must be regular.',
-        400,
-      ),
-    );
+  // if (role !== 'regular')
+  //   return next(
+  //     new ErrorResponse(
+  //       'Wrong role in request body. Role must be regular.',
+  //       400,
+  //     ),
+  //   );
 
   // Create Regular User
   const regularUser = await RegularUser.create({
     email,
     name,
     password,
-    role,
+    image,
+    pseudonym,
   });
 
   const responseObject = {
     _id: regularUser.id,
-    role: regularUser.role,
+    role: 'regular',
     name: regularUser.name,
+    email: regularUser.email,
     image: regularUser.image,
-    message:
-      "Welcome to Kemon Achen! Let's take a step towards healing together <3",
+    pseudonym: regularUser.pseudonym,
   };
 
   sendTokenResponse(regularUser, 200, res, responseObject);
@@ -482,15 +483,17 @@ exports.getUserTestHistory = asyncHandler(async (req, res) => {
 
   let testNames = await Test.find({
     _id: { $in: testIdsArray },
-  }).select('name').lean();
+  })
+    .select('name')
+    .lean();
 
   //console.log('test name : ', testNames);
 
   // Making an object from array
-  const testIdtoName = {}
+  const testIdtoName = {};
   testNames.map(test => {
-    testIdtoName[test._id] = test.name
-  })
+    testIdtoName[test._id] = test.name;
+  });
 
   //console.log(testIdtoName);
 

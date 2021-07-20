@@ -588,8 +588,6 @@ exports.getLatestAdvices = asyncHandler(async (req, res) => {
  * @access   Private
  */
 exports.getSuggestedProfessionals = asyncHandler(async (req, res) => {
-  // const userId = mongoose.Types.ObjectId(req.user._id);
-
   const queryField = getQueryOption(req);
 
   //get all the professionals sorted by(rank) from the community that a user belongs to

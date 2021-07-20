@@ -628,3 +628,18 @@ exports.getSuggestedProfessionals = asyncHandler(async (req, res) => {
 
   res.status(200).json(suggestedProfessionals);
 });
+
+/**
+ * @desc     gets notifications of an user
+ * @route    GET /api/v1/user/notifications
+ * @access   Private
+ */
+exports.getUserNotifications = asyncHandler(async (req, res) => {
+  const userId = mongoose.Types.ObjectId(req.user._id);
+
+  const notifications = await User.findById(userId).select('notifications');
+  const response = notifications.notifications;
+  //console.log(response);
+
+  res.status(200).json(response);
+});

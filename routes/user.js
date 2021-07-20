@@ -15,6 +15,7 @@ const {
   getLatestAdvices,
   logOut,
   getSuggestedProfessionals,
+  getUserNotifications,
 } = require('../controllers/user');
 
 const router = express.Router();
@@ -27,6 +28,7 @@ router.post('/logout', protect, logOut);
 router.post('/pushToken/register', protect, registerPushNotificationToken);
 
 router.get('/:userid/posts', protect, getUserPosts);
+router.get('/notifications', protect, getUserNotifications);
 router.get('/advice/latest', protect, getLatestAdvices);
 router.get('/:userid/comments', protect, getUserComments);
 router.get('/tests/history', protect, getUserTestHistory);

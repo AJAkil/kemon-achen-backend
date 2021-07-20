@@ -14,6 +14,7 @@ const {
   getProfessionalChamberInformation,
   getLatestAdvices,
   logOut,
+  getSuggestedProfessionals,
 } = require('../controllers/user');
 
 const router = express.Router();
@@ -38,5 +39,6 @@ router.get(
   protect,
   getProfessionalChamberInformation,
 );
+router.get('/suggesetedProfessionals', protect, getSuggestedProfessionals);
 
 module.exports = router;

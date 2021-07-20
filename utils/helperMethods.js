@@ -57,6 +57,8 @@ exports.getQueryOption = req => {
     new: { createdAt: -1 },
     default: { createdAt: -1 },
     professional: { createdAt: -1 },
+    rank: { rank: -1 },
+    location: { rank: 1 },
   };
 
   //console.log(Object.keys(req.query)[0]);

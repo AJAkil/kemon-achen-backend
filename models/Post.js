@@ -31,7 +31,7 @@ const PostSchema = new mongoose.Schema(
     commentCount: Number,
     postType: {
       type: String,
-      enum: ['General', 'Q/A', 'Suggestions'],
+      enum: ['General', 'Q/A', 'recommendations', 'help'],
       default: 'General',
     },
     community: {

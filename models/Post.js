@@ -29,12 +29,11 @@ const PostSchema = new mongoose.Schema(
     ],
     voteCount: Number,
     commentCount: Number,
-    // comments: [
-    //   {
-    //     type: mongoose.Schema.ObjectId,
-    //     ref: "Comment",
-    //   },
-    // ],
+    postType: {
+      type: String,
+      enum: ['General', 'Q/A', 'Suggestions'],
+      default: 'General',
+    },
     community: {
       type: mongoose.Schema.ObjectId,
       ref: 'Community',
@@ -42,5 +41,7 @@ const PostSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+PostSchema.index({ title: 'text', content: 'text' });
 
 module.exports = mongoose.model('Post', PostSchema);

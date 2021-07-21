@@ -157,3 +157,41 @@ exports.getCommunityAbout = asyncHandler(async (req, res) => {
 
   res.status(200).json(communityInfo);
 });
+
+/**
+ * @desc     update about
+ * @route    GET /api/v1/community/:communityId/postSearch
+ * @access   Private
+ */
+exports.searchCommunityPosts = asyncHandler(async (req, res) => {
+  const communityId = mongoose.Types.ObjectId(req.params.communityId);
+
+  const populationQuery = [
+    {
+      path: 'postedBy',
+      select: '_id name rank role',
+    },
+  ];
+
+  let posts = await Post.find({
+    community: communityId,
+    $text: { $search: req.query.searchKeyword },
+  })
+    .select([
+      '_id',
+      'title',
+      'content',
+      'asPseudo',
+      'voteCount',
+      'commentCount',
+      'createdAt',
+      'likedByUsers',
+    ])
+    .populate(populationQuery)
+    .sort({ createdAt: -1 })
+    .lean();
+
+  console.log(posts);
+
+  res.status(200).json(posts);
+});

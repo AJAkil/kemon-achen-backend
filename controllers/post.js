@@ -63,9 +63,21 @@ exports.likePost = asyncHandler(async (req, res, next) => {
   let counter = 1;
   //let isLiked = false;
 
+  const postedByUser = await Post.findById(id).select(['postedBy', 'title']);
+  const notificationToBeSendUserId = postedByUser.postedBy;
+
+  const currentUserInfo = await User.findById(userId).select('name');
+  const currentUserName = currentUserInfo.name;
+
+  const content = postedByUser.title;
+  // console.log('current user ', postedByUser.title);
+  // console.log('notified user ', currentUserName);
+
   let post = null;
+  const user = await User.findById(notificationToBeSendUserId);
+
   if (req.query.likeOptions === 'like') {
-    message = 'The post has been liked!';
+    message = currentUserName + ' liked your post';
     //isLiked = true;
     post = await Post.findByIdAndUpdate(
       id,
@@ -76,8 +88,11 @@ exports.likePost = asyncHandler(async (req, res, next) => {
       },
       { new: true, upsert: true },
     );
+
+    user.notifications.push({ message, content });
+    await user.save();
   } else {
-    message = 'The post has been unliked!';
+    message = currentUserName + ' unliked your post';
     counter = -1;
     //isLiked = false;
     post = await Post.findByIdAndUpdate(
@@ -89,6 +104,8 @@ exports.likePost = asyncHandler(async (req, res, next) => {
       },
       { new: true, upsert: true },
     );
+    user.notifications.push({ message, content });
+    await user.save();
   }
 
   //console.log(post);
@@ -148,6 +165,16 @@ exports.createComment = asyncHandler(async (req, res, next) => {
     );
   }
 
+  const notifiedUser = postChecker.postedBy;
+  //const notificationToBeSendUserId = postedByUser.postedBy;
+
+  const currentUserInfo = await User.findById(req.user.id).select('name');
+  const currentUserName = currentUserInfo.name;
+
+  const message = currentUserName + ' commented on your post';
+  const content = req.body.content;
+  //console.log('comment ', content, ' mes ', message);
+
   const comment = await Comment.create(req.body);
   // console.log(comment._id);
 
@@ -172,6 +199,10 @@ exports.createComment = asyncHandler(async (req, res, next) => {
   );
 
   //console.log(updatedPost);
+
+  const user = await User.findById(notifiedUser);
+  user.notifications.push({ message, content });
+  await user.save();
 
   res.status(200).json(commentResponse[0]);
 });

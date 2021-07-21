@@ -44,7 +44,7 @@ app.use('/api/v1/community', community);
 // Custom Error Handler
 app.use(errorHandler);
 
-cron.schedule('*/10 * * * *', () => {
+cron.schedule('*/59 * * * *', () => {
   console.log('running a task every 1 minute');
   sendNotifications();
 });

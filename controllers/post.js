@@ -89,7 +89,7 @@ exports.likePost = asyncHandler(async (req, res, next) => {
       { new: true, upsert: true },
     );
 
-    user.notifications.push({ message, content });
+    user.notifications.unshift({ message, content });
     await user.save();
   } else {
     message = currentUserName + ' unliked your post';
@@ -104,7 +104,7 @@ exports.likePost = asyncHandler(async (req, res, next) => {
       },
       { new: true, upsert: true },
     );
-    user.notifications.push({ message, content });
+    user.notifications.unshift({ message, content });
     await user.save();
   }
 
@@ -201,7 +201,7 @@ exports.createComment = asyncHandler(async (req, res, next) => {
   //console.log(updatedPost);
 
   const user = await User.findById(notifiedUser);
-  user.notifications.push({ message, content });
+  user.notifications.unshift({ message, content });
   await user.save();
 
   res.status(200).json(commentResponse[0]);

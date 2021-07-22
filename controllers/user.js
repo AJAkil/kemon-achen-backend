@@ -52,7 +52,6 @@ exports.signupRegularUser = asyncHandler(async (req, res, next) => {
     name: regularUser.name,
     email: regularUser.email,
     image: regularUser.image,
-    pseudonym: regularUser.pseudonym,
   };
 
   sendTokenResponse(regularUser, 200, res, responseObject);
@@ -65,7 +64,6 @@ exports.signupRegularUser = asyncHandler(async (req, res, next) => {
  */
 exports.signupProfessionalUser = asyncHandler(async (req, res, next) => {
   const {
-    role,
     email,
     name,
     password,
@@ -73,6 +71,7 @@ exports.signupProfessionalUser = asyncHandler(async (req, res, next) => {
     license,
     licenseIssued,
     specializations,
+    image,
   } = req.body;
 
   // Check if an user with the same email exist in the database
@@ -82,16 +81,17 @@ exports.signupProfessionalUser = asyncHandler(async (req, res, next) => {
   if (user)
     return next(new ErrorResponse('This email is already registered', 400));
 
-  if (role !== 'professional')
-    return next(
-      new ErrorResponse(
-        'Wrong role in request body. Role must be professional',
-        400,
-      ),
-    );
+  // if (role !== 'professional')
+  //   return next(
+  //     new ErrorResponse(
+  //       'Wrong role in request body. Role must be professional',
+  //       400,
+  //     ),
+  //   );
 
   // console.log(specializations)
   // find the name of the disease tags from the database
+
   let specialization = await Disease.find({
     title: {
       $in: specializations,
@@ -108,11 +108,12 @@ exports.signupProfessionalUser = asyncHandler(async (req, res, next) => {
     email,
     name,
     password,
-    role,
+    role: 'professional',
     verified,
     license,
     licenseIssued,
     specialization,
+    image,
   });
 
   const responseObject = {

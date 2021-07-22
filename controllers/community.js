@@ -165,7 +165,7 @@ exports.getCommunityAbout = asyncHandler(async (req, res) => {
  * @access   Private
  */
 exports.searchCommunityPosts = asyncHandler(async (req, res) => {
-  const communityId = mongoose.Types.ObjectId(req.params.communityId);
+  //const communityId = mongoose.Types.ObjectId(req.params.communityId);
 
   // const populationQuery = [
   //   {
@@ -247,7 +247,7 @@ exports.searchCommunityPosts = asyncHandler(async (req, res) => {
     },
   ]);
 
-  // saving the posts in a map
+  // filtering the postedBy data
   let postsPostedBy = posts.map(post => post.postedBy);
 
   let users = await User.find({
@@ -256,10 +256,10 @@ exports.searchCommunityPosts = asyncHandler(async (req, res) => {
     .select(['_id', 'name', 'rank', 'role'])
     .lean();
 
-  let postedBy = {};
+  let postedByTracker = {};
 
   users.map(user => {
-    postedBy[user._id] = user;
+    postedByTracker[user._id] = user;
   });
 
   posts.forEach(post => {
@@ -269,8 +269,8 @@ exports.searchCommunityPosts = asyncHandler(async (req, res) => {
       req.user._id,
     );
 
-    delete postedBy[post.postedBy].usertype;
-    post.postedBy = postedBy[post.postedBy];
+    delete postedByTracker[post.postedBy].usertype;
+    post.postedBy = postedByTracker[post.postedBy];
     delete post.likedByUsers;
   });
 

@@ -1,5 +1,6 @@
 const Disease = require('../models/Disease');
 const Post = require('../models/Post');
+const User = require('../models/User');
 const Community = require('../models/Community');
 const asyncHandler = require('../middleware/async');
 const mongoose = require('mongoose');
@@ -166,53 +167,17 @@ exports.getCommunityAbout = asyncHandler(async (req, res) => {
 exports.searchCommunityPosts = asyncHandler(async (req, res) => {
   const communityId = mongoose.Types.ObjectId(req.params.communityId);
 
-  const populationQuery = [
-    {
-      path: 'postedBy',
-      select: '_id name rank role',
-    },
-  ];
-
-  let posts = await Post.find({
-    community: communityId,
-    $text: { $search: req.query.searchKeyword },
-  })
-    .select([
-      '_id',
-      'title',
-      'content',
-      'asPseudo',
-      'voteCount',
-      'commentCount',
-      'createdAt',
-      'likedByUsers',
-      'postType',
-    ])
-    .populate(populationQuery)
-    .sort({ createdAt: -1 })
-    .lean();
-
-  // let posts = await Post.aggregate([
+  // const populationQuery = [
   //   {
-  //     $match: {
-  //       communityId: communityId,
-  //       // {
-  //       //   $or: [
-  //       //     {
-  //       //       title: {
-  //       //         $regex: req.query.searchKeyword,
-  //       //       },
-  //       //     },
-  //       //     {
-  //       //       content: {
-  //       //         $regex: req.query.searchKeyword,
-  //       //       },
-  //       //     },
-  //       //   ],
-  //       // },
-  //     },
+  //     path: 'postedBy',
+  //     select: '_id name rank role',
   //   },
-  // ]);
+  // ];
+
+  // let posts = await Post.find({
+  //   community: communityId,
+  //   $text: { $search: req.query.searchKeyword },
+  // })
   //   .select([
   //     '_id',
   //     'title',
@@ -228,18 +193,18 @@ exports.searchCommunityPosts = asyncHandler(async (req, res) => {
   //   .sort({ createdAt: -1 })
   //   .lean();
 
-  posts.forEach(post => {
-    post.createdAt = getTimeDiff(post.createdAt);
-    post.isLikedByCurrentUser = presentinTheArray(
-      post.likedByUsers,
-      req.user._id,
-    );
+  // posts.forEach(post => {
+  //   post.createdAt = getTimeDiff(post.createdAt);
+  //   post.isLikedByCurrentUser = presentinTheArray(
+  //     post.likedByUsers,
+  //     req.user._id,
+  //   );
 
-    delete post.postedBy.usertype;
-    delete post.likedByUsers;
-  });
+  //   delete post.postedBy.usertype;
+  //   delete post.likedByUsers;
+  // });
 
-  let postsTest = await Post.aggregate([
+  let posts = await Post.aggregate([
     {
       $match: {
         $and: [
@@ -249,11 +214,13 @@ exports.searchCommunityPosts = asyncHandler(async (req, res) => {
               {
                 title: {
                   $regex: req.query.searchKeyword,
+                  $options: 'i',
                 },
               },
               {
                 content: {
                   $regex: req.query.searchKeyword,
+                  $options: 'i',
                 },
               },
             ],
@@ -272,19 +239,42 @@ exports.searchCommunityPosts = asyncHandler(async (req, res) => {
         createdAt: 1,
         likedByUsers: 1,
         postType: 1,
+        postedBy: 1,
       },
     },
-    // {
-    //   $lookup: {
-    //     from: 'User',
-    //     localField: '_id',
-    //     foreignField: 'postedBy',
-    //     as: 'inventory_docs',
-    //   },
-    // },
+    {
+      $sort: { createdAt: -1 },
+    },
   ]);
 
-  console.log(postsTest);
+  // saving the posts in a map
+  let postsPostedBy = posts.map(post => post.postedBy);
+
+  let users = await User.find({
+    _id: { $in: postsPostedBy },
+  })
+    .select(['_id', 'name', 'rank', 'role'])
+    .lean();
+
+  let postedBy = {};
+
+  users.map(user => {
+    postedBy[user._id] = user;
+  });
+
+  posts.forEach(post => {
+    post.createdAt = getTimeDiff(post.createdAt);
+    post.isLikedByCurrentUser = presentinTheArray(
+      post.likedByUsers,
+      req.user._id,
+    );
+
+    delete postedBy[post.postedBy].usertype;
+    post.postedBy = postedBy[post.postedBy];
+    delete post.likedByUsers;
+  });
+
+  //console.log(posts);
 
   res.status(200).json(posts);
 });

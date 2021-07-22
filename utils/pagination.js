@@ -2,7 +2,6 @@ exports.paginate = schema => {
   schema.statics.paginate = async function (filter, options) {
     const { sortBy, select, populate } = options;
 
-    console.log(sortBy);
     const countPromise = this.countDocuments(filter).exec();
     let docsPromise = this.find(filter).populate(populate).sort(sortBy).lean();
 

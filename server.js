@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const connectDB = require('./config/db');
 require('colors');
 const errorHandler = require('./middleware/error');
+const cron = require('node-cron');
 
 // Load env vars
 dotenv.config({ path: './config/config.env' });
@@ -16,6 +17,7 @@ const user = require('./routes/user');
 const post = require('./routes/post');
 const test = require('./routes/test');
 const community = require('./routes/community');
+const { sendNotifications } = require('./utils/sendNotification');
 
 const app = express();
 
@@ -41,6 +43,11 @@ app.use('/api/v1/community', community);
 
 // Custom Error Handler
 app.use(errorHandler);
+
+cron.schedule('*/59 * * * *', () => {
+  console.log('running a task every 1 minute');
+  sendNotifications();
+});
 
 const PORT = process.env.PORT || 9000;
 const server = app.listen(

@@ -28,24 +28,24 @@ exports.protect = asyncHandler(async (req, res, next) => {
     //console.log(decoded);
 
     req.user = await User.findById(decoded.id);
-    console.log(req.user.email);
+    //console.log(req.user.email);
     next();
   } catch (e) {
     return next(new ErrorResponse('Not authorized to access this route'), 401);
   }
 });
 
-// exports.authorize = (...roles) => {
-//   return (req, res, next) => {
-//     console.log(req.user.role);
-//     if (!roles.includes(req.user.role)) {
-//       return next(
-//         new ErrorResponse(
-//           `User role ${req.user.role} is not authorized to access the route`,
-//           403,
-//         ),
-//       );
-//     }
-//     next();
-//   };
-// };
+exports.authorize = (...roles) => {
+  return (req, res, next) => {
+    //console.log(req.user.role);
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new ErrorResponse(
+          `User role ${req.user.role} is not authorized to access the route`,
+          403,
+        ),
+      );
+    }
+    next();
+  };
+};

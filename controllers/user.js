@@ -13,7 +13,9 @@ const {
   sendTokenResponse,
   getTimeDiff,
   presentinTheArray,
+  getQueryOption,
 } = require('../utils/helperMethods');
+const Advice = require('../models/Advice');
 
 /**
  * @desc     Signup Regular User
@@ -166,6 +168,42 @@ exports.login = asyncHandler(async (req, res, next) => {
 });
 
 /**
+ * @desc     logs out an user
+ * @route    POST /api/v1/user/logout
+ * @access   Private
+ */
+exports.logOut = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+  user.pushNotificationTokens = [];
+  await user.save();
+
+  res.status(200).json({ message: 'Logout successful' });
+});
+
+/**
+ * @desc     register a push token for an user
+ * @route    POST /api/v1/user/pushToken/register
+ * @access   Private
+ */
+exports.registerPushNotificationToken = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+  //console.log(JSON.stringify(user));
+  const token = req.body.pushToken;
+
+  if (!user.pushNotificationTokens.some(tok => tok === token))
+    user.pushNotificationTokens.push(token);
+
+  //console.log(user);
+
+  await user.save();
+
+  // const responseObject = {
+  //   pushToken: user.id,
+  // };
+  res.status(200).json({ pushToken: token });
+});
+
+/**
  * @desc     gets an user
  * @route    GET /api/v1/auth/me
  * @access   Private
@@ -296,7 +334,7 @@ exports.joinCommunity = asyncHandler(async (req, res, next) => {
     },
   });
 
-  console.log(community);
+  //console.log(community);
   if (community.length !== 0)
     return next(
       new Error(
@@ -516,4 +554,92 @@ exports.getUserTestHistory = asyncHandler(async (req, res) => {
   //console.log(responseObject);
 
   res.status(200).json(responseObject);
+});
+
+/**
+ * @desc     gets latest advices for an user
+ * @route    GET /api/v1/user/advice/latest
+ * @access   Private
+ */
+exports.getLatestAdvices = asyncHandler(async (req, res) => {
+  const userId = mongoose.Types.ObjectId(req.user._id);
+
+  const userInfo = await User.find({ _id: userId }).select('testInfo');
+
+  const adviceIds = userInfo[0].testInfo[0].advice;
+
+  //console.log(adviceIds);
+
+  let advices = await Advice.find({
+    _id: { $in: adviceIds },
+  });
+
+  //console.log(advices);
+
+  const responseObject = {
+    anxietyAdvice: advices[0],
+    depressionAdvice: advices[1],
+    stressAdvice: advices[2],
+  };
+
+  res.status(200).json(responseObject);
+});
+/**
+ * @desc     gets suggested professionaal for a logged in user
+ * @route    GET /api/v1/user/suggesetedProfessionals
+ * @access   Private
+ */
+exports.getSuggestedProfessionals = asyncHandler(async (req, res) => {
+  const queryField = getQueryOption(req);
+
+  //get all the professionals sorted by(rank) from the community that a user belongs to
+
+  // find communities of a user
+  let communities = await Community.find({
+    users: {
+      $in: req.user._id,
+    },
+  })
+    .select(['_id'])
+    .lean();
+
+  communities = communities.map(community => {
+    return community._id;
+  });
+
+  let suggestedProfessionals = await User.find({
+    communities: {
+      $in: communities,
+    },
+    role: 'professional',
+  })
+    .select(['name', 'rank', 'image', 'specialization', 'address'])
+    .populate('specialization', ['title'])
+    .sort(queryField)
+    .lean();
+
+  for (let i = 0; i < suggestedProfessionals.length; i++) {
+    suggestedProfessionals[i].specializations =
+      suggestedProfessionals[i].specialization;
+
+    delete suggestedProfessionals[i].specialization;
+    delete suggestedProfessionals[i].usertype;
+  }
+
+  res.status(200).json(suggestedProfessionals);
+});
+
+/**
+ * @desc     gets notifications of an user
+ * @route    GET /api/v1/user/notifications
+ * @access   Private
+ */
+exports.getUserNotifications = asyncHandler(async (req, res) => {
+  const userId = mongoose.Types.ObjectId(req.user._id);
+
+  const notifications = await User.findById(userId).select('notifications');
+  const response = notifications.notifications;
+  //console.log(response);
+
+  res.status(200).json(response);
 });

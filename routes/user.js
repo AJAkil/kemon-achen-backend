@@ -16,6 +16,8 @@ const {
   logOut,
   getSuggestedProfessionals,
   getUserNotifications,
+  getSuggestedCommunities,
+  adviceFollowDone,
 } = require('../controllers/user');
 
 const router = express.Router();
@@ -42,5 +44,6 @@ router.get(
   getProfessionalChamberInformation,
 );
 router.get('/suggesetedProfessionals', protect, getSuggestedProfessionals);
-
+router.get('/communities/suggested', protect, getSuggestedCommunities);
+router.get('/advice/followed', protect, adviceFollowDone);
 module.exports = router;

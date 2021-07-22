@@ -7,22 +7,21 @@ exports.sendNotifications = async () => {
   let expo = new Expo();
 
   // Create the messages that you want to send to clients
-  const userInfo = await User.find({}).select([
-    'name',
-    'pushNotificationTokens',
-    'testInfo',
-    'isDoneNotifying',
-  ]);
+  const userInfo = await User.find({
+    role: 'regular',
+    isDoneNotifying: false,
+  }).select(['name', 'pushNotificationTokens', 'testInfo', 'isDoneNotifying']);
 
   //let somePushTokens = [];
+  //console.log(userInfo);
 
   let tokenMappingToUser = [];
   userInfo.map(user => {
     if (
-      user.pushNotificationTokens &&
-      user.isDoneNotifying === false &&
-      user.testInfo !== undefined
+      user.pushNotificationTokens.length !== 0 &&
+      user.testInfo.length !== 0
     ) {
+      console.log(user);
       const iterator = user.pushNotificationTokens.values();
       for (const pushtoken of iterator) {
         tokenMappingToUser.push({

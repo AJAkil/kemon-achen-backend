@@ -643,3 +643,32 @@ exports.getUserNotifications = asyncHandler(async (req, res) => {
 
   res.status(200).json(response);
 });
+
+/**
+ * @desc     gets unjoined communties of a logged in user
+ * @route    GET /api/v1/user/communities/suggested
+ * @access   Private
+ */
+exports.getSuggestedCommunities = asyncHandler(async (req, res) => {
+  // find suggested communities of a user
+  const communities = await Community.find({
+    users: {
+      $nin: req.user._id,
+    },
+  }).select(['name', 'image', 'description']);
+
+  res.status(200).json(communities);
+});
+
+/**
+ * @desc     notification sent done
+ * @route    GET /api/v1/user/advice/followed
+ * @access   Private
+ */
+exports.adviceFollowDone = asyncHandler(async (req, res) => {
+  const user = await User.findOne(req.user._id);
+  user.isDoneNotifying = true;
+  await user.save();
+
+  res.status(200).json({ message: 'Notified successful' });
+});

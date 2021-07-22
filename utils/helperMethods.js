@@ -63,7 +63,7 @@ exports.getQueryOption = req => {
 
   //console.log(Object.keys(req.query)[0]);
 
-  if (Object.keys(req.query).length === 0) {
+  if (Object.keys(req.query).length === 2) {
     return queryDict.default;
   } else {
     return queryDict[req.query[Object.keys(req.query)[0]]];
@@ -80,6 +80,7 @@ exports.presentinTheArray = (array, value) => {
   }
   return isPresent;
 };
+
 exports.sortByProfessional = array => {
   let professionalData = array.filter(
     obj => obj.postedBy.role === 'professional',

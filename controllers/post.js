@@ -89,7 +89,7 @@ exports.likePost = asyncHandler(async (req, res, next) => {
       { new: true, upsert: true },
     );
 
-    user.notifications.push({ message, content });
+    user.notifications.unshift({ message, content });
     await user.save();
   } else {
     message = currentUserName + ' unliked your post';
@@ -104,7 +104,7 @@ exports.likePost = asyncHandler(async (req, res, next) => {
       },
       { new: true, upsert: true },
     );
-    user.notifications.push({ message, content });
+    user.notifications.unshift({ message, content });
     await user.save();
   }
 
@@ -201,7 +201,7 @@ exports.createComment = asyncHandler(async (req, res, next) => {
   //console.log(updatedPost);
 
   const user = await User.findById(notifiedUser);
-  user.notifications.push({ message, content });
+  user.notifications.unshift({ message, content });
   await user.save();
 
   res.status(200).json(commentResponse[0]);
@@ -430,24 +430,28 @@ exports.getFeed = asyncHandler(async (req, res) => {
     },
   ];
 
-  const posts = await Post.find({ community: { $in: userCommunities } })
-    .select([
-      '_id',
-      'title',
-      'content',
-      'asPseudo',
-      'voteCount',
-      'commentCount',
-      'createdAt',
-      'likedByUsers',
-    ])
-    .populate(populationQuery)
-    .sort(queryField)
-    .lean();
+  const { page, limit } = req.query;
+  // const posts = await Post.find({ community: { $in: userCommunities } })
+  const posts = await Post.paginate(
+    { community: { $in: userCommunities } },
+    { page, limit, populate: populationQuery, sortBy: queryField },
+  );
+  // .select([
+  //   '_id',
+  //   'title',
+  //   'content',
+  //   'asPseudo',
+  //   'voteCount',
+  //   'commentCount',
+  //   'createdAt',
+  //   'likedByUsers',
+  // ])
+  // .populate(populationQuery)
+  // .sort(queryField)
+  // .lean();
 
   // editing the createdAt field
-
-  posts.forEach(post => {
+  posts.results.forEach(post => {
     post.createdAt = getTimeDiff(post.createdAt);
     post.isLikedByCurrentUser = presentinTheArray(
       post.likedByUsers,
@@ -457,17 +461,14 @@ exports.getFeed = asyncHandler(async (req, res) => {
     delete post.postedBy.usertype;
     delete post.likedByUsers;
   });
-  //console.log(posts);
-  //console.log('feeed uswer id ', req.user._id);
 
   // seprating the professional and regular user
-  let sortedPosts = posts;
-
+  let sortedPosts = posts.results;
   // if we have to sort profession
   if (req.query.feedSortedBy === 'professional') {
-    sortedPosts = sortByProfessional(posts);
+    sortedPosts = sortByProfessional(sortedPosts);
   }
 
-  sortedPosts.forEach(post => delete post.postedBy.role);
+  // sortedPosts.forEach(post => delete post.postedBy.role);
   res.status(200).json(sortedPosts);
 });

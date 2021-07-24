@@ -53,7 +53,7 @@ exports.signupRegularUser = asyncHandler(async (req, res, next) => {
     role: 'regular',
     name: regularUser.name,
     email: regularUser.email,
-    image: regularUser.image,
+    image: `https://picsum.photos/seed/${user.id}/300`,
   };
 
   sendTokenResponse(regularUser, 200, res, responseObject);
@@ -122,7 +122,7 @@ exports.signupProfessionalUser = asyncHandler(async (req, res, next) => {
     _id: professionalUser.id,
     role: professionalUser.role,
     name: professionalUser.name,
-    image: professionalUser.image,
+    image: `https://picsum.photos/seed/${user.id}/300`,
     message: 'You are awaiting verification',
   };
 
@@ -160,7 +160,7 @@ exports.login = asyncHandler(async (req, res, next) => {
   const responseObject = {
     _id: user.id,
     role: user.role,
-    image: user.image,
+    image: `https://picsum.photos/seed/${user.id}/300`,
     name: user.name,
   };
 
@@ -231,6 +231,17 @@ exports.getUserPosts = asyncHandler(async (req, res, next) => {
       new ErrorResponse(`User not found with the id ${req.params.userid}`, 404),
     );
 
+  const populationQuery = [
+    {
+      path: 'postedBy',
+      select: '_id name image rank role',
+    },
+    {
+      path: 'community',
+      select: '_id name',
+    },
+  ];
+
   // find posts in Post collection
   const posts = await Post.find({
     postedBy: {
@@ -245,7 +256,7 @@ exports.getUserPosts = asyncHandler(async (req, res, next) => {
       'createdAt',
       'likedByUsers',
     ])
-    .populate('community', ['name', 'image'])
+    .populate(populationQuery)
     .lean();
 
   // console.log(posts)

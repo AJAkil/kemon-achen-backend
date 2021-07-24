@@ -77,6 +77,7 @@ exports.getCommunityFeed = asyncHandler(async (req, res) => {
       'commentCount',
       'createdAt',
       'likedByUsers',
+      'postType',
     ])
     .populate(populationQuery)
     .sort(queryField)

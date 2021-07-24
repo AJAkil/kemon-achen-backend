@@ -53,7 +53,6 @@ exports.signupRegularUser = asyncHandler(async (req, res, next) => {
     role: 'regular',
     name: regularUser.name,
     email: regularUser.email,
-    image: `https://picsum.photos/seed/${user.id}/300`,
   };
 
   sendTokenResponse(regularUser, 200, res, responseObject);
@@ -122,7 +121,6 @@ exports.signupProfessionalUser = asyncHandler(async (req, res, next) => {
     _id: professionalUser.id,
     role: professionalUser.role,
     name: professionalUser.name,
-    image: `https://picsum.photos/seed/${user.id}/300`,
     message: 'You are awaiting verification',
   };
 
@@ -160,7 +158,6 @@ exports.login = asyncHandler(async (req, res, next) => {
   const responseObject = {
     _id: user.id,
     role: user.role,
-    image: `https://picsum.photos/seed/${user.id}/300`,
     name: user.name,
   };
 
@@ -255,6 +252,7 @@ exports.getUserPosts = asyncHandler(async (req, res, next) => {
       'commentCount',
       'createdAt',
       'likedByUsers',
+      'postType',
     ])
     .populate(populationQuery)
     .lean();

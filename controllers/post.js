@@ -413,7 +413,7 @@ exports.getPostById = asyncHandler(async (req, res, next) => {
  * @access   Private
  */
 exports.getFeed = asyncHandler(async (req, res) => {
-  const queryField = getQueryOption(req);
+  const queryField = { createdAt: -1 };
 
   // search for user community first
   const user = await User.findById(req.user._id).select(['communities']);
@@ -436,19 +436,6 @@ exports.getFeed = asyncHandler(async (req, res) => {
     { community: { $in: userCommunities } },
     { page, limit, populate: populationQuery, sortBy: queryField },
   );
-  // .select([
-  //   '_id',
-  //   'title',
-  //   'content',
-  //   'asPseudo',
-  //   'voteCount',
-  //   'commentCount',
-  //   'createdAt',
-  //   'likedByUsers',
-  // ])
-  // .populate(populationQuery)
-  // .sort(queryField)
-  // .lean();
 
   // editing the createdAt field
   posts.results.forEach(post => {

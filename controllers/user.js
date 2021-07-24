@@ -683,3 +683,47 @@ exports.adviceFollowDone = asyncHandler(async (req, res) => {
 
   res.status(200).json({ message: 'Notified successful' });
 });
+
+/**
+ * @desc     get statistics of professional users
+ * @route    GET /api/v1/user/professional/statistics
+ * @access   Private
+ */
+exports.getProfessionalStatistics = asyncHandler(async (req, res) => {
+  let postInfo = await Post.aggregate([
+    {
+      $match: { postedBy: mongoose.Types.ObjectId(req.user._id) },
+    },
+    {
+      $group: {
+        _id: mongoose.Types.ObjectId(req.user._id),
+        voteCount: { $sum: '$voteCount' },
+        feedbackCount: { $sum: '$commentCount' },
+        postCount: { $sum: 1 },
+      },
+    },
+  ]);
+
+  let userInfo = await User.aggregate([
+    {
+      $match: { _id: mongoose.Types.ObjectId(req.user._id) },
+    },
+    {
+      $project: {
+        communities: { $size: '$communities' },
+        rank: 1,
+        image: 1,
+      },
+    },
+  ]);
+
+  res.status(200).json({
+    _id: postInfo[0]._id,
+    image: userInfo[0].image,
+    rank: userInfo[0].rank,
+    postCount: postInfo[0].postCount,
+    voteCount: postInfo[0].voteCount,
+    feedbackCount: postInfo[0].feedbackCount,
+    communityJoined: userInfo[0].communities,
+  });
+});

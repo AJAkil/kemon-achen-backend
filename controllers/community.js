@@ -49,10 +49,21 @@ exports.getCommunityFeed = asyncHandler(async (req, res) => {
   const communityId = mongoose.Types.ObjectId(req.params.communityId);
   const queryField = getQueryOption(req);
 
+  // const populationQuery = [
+  //   {
+  //     path: 'postedBy',
+  //     select: '_id name rank role',
+  //   },
+  // ];
+
   const populationQuery = [
     {
       path: 'postedBy',
-      select: '_id name rank role',
+      select: '_id name image rank role',
+    },
+    {
+      path: 'community',
+      select: '_id name',
     },
   ];
 

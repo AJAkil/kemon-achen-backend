@@ -144,7 +144,7 @@ exports.createPost = asyncHandler(async (req, res) => {
   const populationQuery = [
     {
       path: 'postedBy',
-      select: '_id name image rank',
+      select: '_id name image rank pseudonym',
     },
     {
       path: 'community',

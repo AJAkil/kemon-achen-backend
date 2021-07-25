@@ -35,5 +35,8 @@
     "hooks": {
       "pre-commit": "yarn lint"
     }
+  },
+  "engines": {
+    "node": "14.x"
   }
 }

@@ -18,6 +18,7 @@ const {
   getUserNotifications,
   getSuggestedCommunities,
   adviceFollowDone,
+  getProfessionalStatistics,
 } = require('../controllers/user');
 
 const router = express.Router();
@@ -46,4 +47,5 @@ router.get(
 router.get('/suggesetedProfessionals', protect, getSuggestedProfessionals);
 router.get('/communities/suggested', protect, getSuggestedCommunities);
 router.get('/advice/followed', protect, adviceFollowDone);
+router.get('/professional/statistics', protect, getProfessionalStatistics);
 module.exports = router;

@@ -231,7 +231,7 @@ exports.getUserPosts = asyncHandler(async (req, res, next) => {
   const populationQuery = [
     {
       path: 'postedBy',
-      select: '_id name image rank role',
+      select: '_id name image rank role pseudonym',
     },
     {
       path: 'community',

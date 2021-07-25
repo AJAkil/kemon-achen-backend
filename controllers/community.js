@@ -59,7 +59,7 @@ exports.getCommunityFeed = asyncHandler(async (req, res) => {
   const populationQuery = [
     {
       path: 'postedBy',
-      select: '_id name image rank role',
+      select: '_id name image rank role pseudonym',
     },
     {
       path: 'community',
@@ -265,7 +265,7 @@ exports.searchCommunityPosts = asyncHandler(async (req, res) => {
   let users = await User.find({
     _id: { $in: postsPostedBy },
   })
-    .select(['_id', 'name', 'rank', 'role'])
+    .select(['_id', 'name', 'rank', 'role', 'pseudonym'])
     .lean();
 
   let postedByTracker = {};

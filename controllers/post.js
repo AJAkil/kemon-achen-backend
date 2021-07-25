@@ -284,7 +284,7 @@ exports.createReply = asyncHandler(async (req, res, next) => {
     .select(['_id', 'content', 'asPseudo', 'voteCount', 'createdAt'])
     .populate({
       path: 'postedBy',
-      select: '_id name image rank',
+      select: '_id name image rank pseudonym',
     })
     .lean();
 
@@ -364,7 +364,7 @@ exports.getPostById = asyncHandler(async (req, res, next) => {
   const populationQuery = [
     {
       path: 'postedBy',
-      select: '_id name image rank',
+      select: '_id name image rank pseudonym',
     },
     {
       path: 'community',
@@ -461,7 +461,7 @@ exports.getFeed = asyncHandler(async (req, res) => {
   const populationQuery = [
     {
       path: 'postedBy',
-      select: '_id name image rank role',
+      select: '_id name image rank role pseudonym',
     },
     {
       path: 'community',

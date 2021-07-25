@@ -138,10 +138,49 @@ exports.createPost = asyncHandler(async (req, res) => {
   req.body.commentCount = 0;
   req.body.likedByUsers = [];
 
-  const post = await Post.create(req.body);
+  const { _id } = await Post.create(req.body);
   //console.log(post);
 
-  res.status(200).json(post); //changed to return the created post
+  const populationQuery = [
+    {
+      path: 'postedBy',
+      select: '_id name image rank',
+    },
+    {
+      path: 'community',
+      select: '_id name',
+    },
+  ];
+
+  const posts = await Post.find(_id)
+    .select([
+      '_id',
+      'title',
+      'content',
+      'asPseudo',
+      'voteCount',
+      'commentCount',
+      'tags',
+      'createdAt',
+    ])
+    .populate(populationQuery)
+    .lean();
+
+  // fixing the disease field
+  const tagInfo = await Disease.find({
+    _id: { $in: posts[0].tags },
+  }).select(['title']);
+
+  for (let i = 0; i < tagInfo.length; i++) {
+    posts[0].tags[i] = tagInfo[i].title;
+  }
+
+  //editing the createdAt field
+
+  posts[0].createdAt = getTimeDiff(posts[0].createdAt);
+  delete posts[0].postedBy.usertype;
+
+  res.status(200).json(posts[0]); //changed to return the created post
 });
 
 /**

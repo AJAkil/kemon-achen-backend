@@ -1,13 +1,9 @@
 [
-  {
-    "name": "PTSD",
-    "isPrivate": false,
-    "description": "Blank for now",
-    "tags": [
-      "607d69997d86b41ef04e3dc5"
-    ],
-    "users": [
-      "607d6dbef0d09133908d5062"
-    ]
-  }
+	{
+		"name": "Anxiety",
+		"isPrivate": false,
+		"description": "We care about your Anxiety, let's heal together!",
+		"tags": ["608459ad7b0b8f46785d8c15"],
+		"users": ["6081e5a547e01753145ed251"]
+	}
 ]

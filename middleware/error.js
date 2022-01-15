@@ -1,9 +1,9 @@
-const ErrorResponse = require("../utils/errorResponse");
+//const ErrorResponse = require('../utils/errorResponse');
 
-const errorHandler = (err, req, res, next) => {
-  let error = { ...err };
-  let statusCode = 500;
-  let message = "";
+const errorHandler = (err, req, res) => {
+  const error = { ...err };
+  // const statusCode = 500;
+  // const message = '';
 
   error.message = err.message;
 
@@ -11,7 +11,7 @@ const errorHandler = (err, req, res, next) => {
   //console.log('pera?',err);
 
   // Mongoose bad objectId
-  if (err.name === "CastError") {
+  if (err.name === 'CastError') {
     error.message = `Document not found with the id ${err.value}`;
     error.statusCode = 404;
   }
@@ -23,16 +23,15 @@ const errorHandler = (err, req, res, next) => {
   }
 
   // Mongoose validation error
-  if (err.name === "ValidationError") {
-    error.message = Object.values(err.errors).map((val) => val.message);
+  if (err.name === 'ValidationError') {
+    error.message = Object.values(err.errors).map(val => val.message);
     error.statusCode = 400;
   }
 
-  //error = new ErrorResponse(message, statusCode);
+  // error = new ErrorResponse(message, statusCode);
 
   res.status(error.statusCode || 404).json({
-    success: false,
-    error: error.message || "General Error",
+    message: error.message || 'General Error',
   });
 };
 

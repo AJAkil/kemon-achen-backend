@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const CommunitySchema = new mongoose.Schema({
   name: String,
@@ -6,20 +6,37 @@ const CommunitySchema = new mongoose.Schema({
   description: String,
   image: {
     type: String,
-    default: "no-photo.jpg",
+    default: 'no-photo.jpg',
   },
   tags: [
     {
       type: mongoose.Schema.ObjectId,
-      ref: "Disease",
+      ref: 'Disease',
     },
   ],
   users: [
     {
       type: mongoose.Schema.ObjectId,
-      ref: "User",
+      ref: 'User',
     },
   ],
+  about: {
+    detailedDescription: String,
+    symptoms: [{ type: String }],
+    toDo: [{ type: String }],
+    images: [
+      {
+        type: String,
+        default: 'no-photo.jpg',
+      },
+    ],
+    links: [
+      {
+        link: String,
+        title: String,
+      },
+    ],
+  },
 });
 
-module.exports = mongoose.model("Community", CommunitySchema);
+module.exports = mongoose.model('Community', CommunitySchema);
